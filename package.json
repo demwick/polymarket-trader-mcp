@@ -1,0 +1,50 @@
+{
+  "name": "polymarket-copy-trader",
+  "version": "1.0.0",
+  "description": "MCP server for Polymarket copy trading — discover top traders and copy their trades",
+  "main": "dist/index.js",
+  "bin": {
+    "polymarket-copy-trader": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "type": "module",
+  "keywords": [
+    "mcp",
+    "polymarket",
+    "copy-trading",
+    "prediction-markets",
+    "ai-agent"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "LAUNCHGUIDE.md",
+    "README.md"
+  ],
+  "dependencies": {
+    "@ethersproject/wallet": "^5.8.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@polymarket/clob-client": "^5.8.1",
+    "better-sqlite3": "^12.8.0",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.2",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.3"
+  }
+}
