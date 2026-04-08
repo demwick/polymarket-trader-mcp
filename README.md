@@ -7,7 +7,7 @@
 [![Tests](https://img.shields.io/badge/tests-200%2B%20passing-brightgreen)]()
 [![Tools](https://img.shields.io/badge/tools-49-orange)]()
 [![MCP Marketplace](https://mcp-marketplace.io/api/badge?slug=polymarket-mcp-server)](https://mcp-marketplace.io/server/polymarket-mcp-server)
-[![polymarket-trader-mcp MCP server](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp/badges/score.svg)](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp)
+[![polymarket-trader-mcp MCP server](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp/badges/card.svg)](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp)
 
 **Trade, analyze, and automate Polymarket prediction markets through AI.**
 
