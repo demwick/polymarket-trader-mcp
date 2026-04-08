@@ -1,35 +1,54 @@
-# Polymarket MCP Server
+# Polymarket Trader MCP Server
 
-MCP server for trading, analyzing, and automating Polymarket prediction markets through Claude Code or any MCP-compatible client.
+[![npm version](https://img.shields.io/npm/v/polymarket-trader-mcp)](https://www.npmjs.com/package/polymarket-trader-mcp)
+[![Node.js](https://img.shields.io/badge/node-18%2B-brightgreen)](https://nodejs.org)
+[![MCP Protocol](https://img.shields.io/badge/MCP-1.0-blue)](https://modelcontextprotocol.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-200%2B%20passing-brightgreen)]()
+[![Tools](https://img.shields.io/badge/tools-48-purple)]()
 
-## Features
+**Trade, analyze, and automate Polymarket prediction markets through AI.**
 
-- **Direct Trading** — Buy and sell on any Polymarket market with market or limit orders
-- **Market Search** — Find markets by keyword, category, or end date
-- **Copy Trading** — Watch top traders and automatically copy their trades
-- **Smart Money Flow** — Detect when multiple top traders converge on the same market
-- **Backtest** — Simulate copying any trader's historical trades before committing capital
-- **Conviction Scoring** — 0-100 score based on win rate, consistency, experience, and diversity
-- **Market Quality Filter** — Auto-skip illiquid markets based on spread, depth, and price range
-- **Stop-Loss / Take-Profit** — Set automated exit rules on any position
-- **Auto-Rebalance** — Remove underperforming traders from your watchlist
-- **Price History** — Historical price data with sparkline charts
-- **34 MCP Tools** — Full control via natural language through Claude Code
+The most comprehensive MCP server for Polymarket — 48 tools spanning direct trading, market discovery, smart money tracking, copy trading, backtesting, risk management, and portfolio optimization. Works with Claude Code, Cursor, or any MCP-compatible client.
+
+---
+
+## Tool Overview
+
+| Category | Count | Highlights |
+|----------|-------|------------|
+| **Discovery** | 9 | Search, trending, featured, events, related markets, smart money flow |
+| **Analysis** | 8 | AI opportunity scoring, conviction rating, price history, market quality, top holders, comparison |
+| **Trading** | 8 | Buy, sell, batch orders, limit orders, order management, safety limits |
+| **Copy Trading** | 5 | Watch traders, auto-monitor, auto-rebalance, backtest |
+| **Portfolio** | 10 | Positions, P&L, balance, risk assessment, SL/TP, optimization, market alerts |
+| **Utilities** | 8 | Dashboard, config, trade history, watchlists, agent logging |
+
+---
 
 ## Quick Start
 
-### Prerequisites
+### One-Line Install
 
-- Node.js 18+
-- Claude Code CLI (or any MCP client)
+```bash
+curl -fsSL https://raw.githubusercontent.com/demwick/polymarket-trader-mcp/main/install.sh | bash
+```
 
-### Installation
+### npm Install
 
 ```bash
 npm install -g polymarket-trader-mcp
 ```
 
-Or add to Claude Code config (`~/.claude/settings.json`):
+### Docker
+
+```bash
+docker compose up
+```
+
+### Claude Code Config
+
+Add to `~/.claude/settings.json`:
 
 ```json
 {
@@ -42,13 +61,151 @@ Or add to Claude Code config (`~/.claude/settings.json`):
 }
 ```
 
+---
+
+## Usage Examples
+
+Just talk naturally to your AI assistant:
+
+> "What are the trending markets today?"
+
+> "Search for bitcoin prediction markets"
+
+> "Buy $5 on this market"
+
+> "Score this trader — should I copy them?"
+
+> "Backtest this trader with $10 per trade"
+
+> "Show smart money flow — what are the top traders buying?"
+
+> "Set stop-loss at 0.30 on my BTC position"
+
+> "Optimize my portfolio with a balanced strategy"
+
+> "Scan for arbitrage opportunities"
+
+> "Compare these two markets side by side"
+
+---
+
+## All 48 Tools
+
+### Discovery
+
+| Tool | Description |
+|------|-------------|
+| `search_markets` | Search markets by keyword (bitcoin, election, UFC...) |
+| `discover_traders` | Find top traders by PnL and volume |
+| `discover_markets` | Find markets by end date and category |
+| `trending_markets` | Top markets by 24h/7d/30d volume |
+| `featured_markets` | Most liquid markets by category (politics, sports, crypto...) |
+| `discover_wta` | WTA tennis markets with stink bid prices |
+| `discover_flow` | Smart money signals — multiple top traders buying same market |
+| `find_related` | Find markets related to a topic or market |
+| `get_market_events` | Browse all markets under an event |
+
+### Analysis
+
+| Tool | Description |
+|------|-------------|
+| `analyze_opportunity` | AI-powered BUY/SELL/HOLD recommendation |
+| `analyze_trader` | Detailed trader profile, win rate, P&L |
+| `score_trader` | Conviction score (0-100) across 5 dimensions |
+| `check_market` | Market quality — spread, depth, price range |
+| `get_price` | Live bid/ask/spread prices |
+| `get_price_history` | Historical prices with sparkline (1h to 1m) |
+| `get_top_holders` | Biggest position holders in a market |
+| `compare_markets` | Side-by-side comparison of 2-5 markets |
+
+### Trading
+
+| Tool | Description |
+|------|-------------|
+| `buy` | Buy shares on any market |
+| `sell` | Sell an open position |
+| `batch_order` | Execute up to 10 orders at once |
+| `place_stink_bid` | Place limit orders at discount |
+| `cancel_orders` | Cancel all open orders |
+| `get_open_orders` | View pending limit orders |
+| `get_order_status` | Check status of a specific order |
+| `go_live` | Switch from preview to live mode |
+
+### Copy Trading
+
+| Tool | Description |
+|------|-------------|
+| `watch_wallet` | Add/remove traders from watchlist |
+| `start_monitor` | Start automatic copy trading loop |
+| `stop_monitor` | Stop monitoring |
+| `rebalance` | Remove underperforming traders |
+| `backtest_trader` | Simulate copying a trader's past trades |
+
+### Portfolio & Risk
+
+| Tool | Description |
+|------|-------------|
+| `get_balance` | Account balance, budget, and P&L |
+| `get_portfolio` | Multi-wallet overview with P&L per trader |
+| `get_positions` | Open/closed positions |
+| `close_position` | Manually close a position |
+| `set_exit_rules` | Set stop-loss and take-profit levels |
+| `check_exits` | Check positions for resolution |
+| `assess_risk` | Portfolio risk scoring and warnings |
+| `optimize_portfolio` | AI-powered optimization (conservative/balanced/aggressive) |
+| `watch_market` | Market watchlist with price alerts |
+| `detect_arbitrage` | Find YES+NO price discrepancies |
+
 ### Configuration
 
-Copy `.env.example` to `.env` and configure:
+| Tool | Description |
+|------|-------------|
+| `set_config` | Update bot settings |
+| `set_safety_limits` | Max order size, exposure cap, spread tolerance |
+| `get_dashboard` | Terminal-formatted dashboard |
+| `get_trade_history` | Trade history with filters |
+| `list_watchlist` | Show watched wallets |
+| `log_cycle` | Log agent cycle for dashboard |
+| `get_trader_positions` | View a trader's open positions |
+| `discover_wta` | WTA tennis market discovery |
 
-```bash
-cp .env.example .env
+---
+
+## Architecture
+
 ```
+Claude Code / Cursor / AI Client
+        |
+        | MCP Protocol (stdio)
+        v
++------------------+
+|  MCP Server      |  48 tools registered
+|  (index.ts)      |
++--------+---------+
+         |
+    +----+----+
+    |         |
+ Tools    Services
+    |         |
+    v         v
++-------+ +------------+
+| Zod   | | Backtester |
+| Input | | Scorer     |
+| Valid. | | SmartFlow  |
++-------+ | Filter     |
+          | Tracker    |
+          | Executor   |
+          +-----+------+
+                |
+        +-------+-------+
+        |       |       |
+     Data    Gamma    CLOB
+     API      API     API
+```
+
+---
+
+## Configuration
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -59,89 +216,20 @@ cp .env.example .env
 | `POLY_API_KEY` | Live only | - | CLOB API key |
 | `POLY_API_SECRET` | Live only | - | CLOB API secret |
 | `POLY_API_PASSPHRASE` | Live only | - | CLOB API passphrase |
-| `MCP_LICENSE_KEY` | Pro | - | Marketplace license key |
 
-## Tools
+---
 
-### Discovery
-| Tool | Description |
-|------|-------------|
-| `search_markets` | Search markets by keyword (bitcoin, election, UFC...) |
-| `discover_traders` | Find top traders by PnL and volume |
-| `discover_markets` | Find markets by end date and category |
-| `discover_wta` | Find WTA tennis markets with stink bid prices |
-| `discover_flow` | Smart money signals — multiple top traders buying same market |
+## Safety Features
 
-### Trading
-| Tool | Description |
-|------|-------------|
-| `buy` | Buy shares on any market — direct trading |
-| `sell` | Sell an open position |
-| `place_stink_bid` | Place limit orders at discount |
-| `cancel_orders` | Cancel all open orders |
-| `go_live` | Switch from preview to live mode |
+- Configurable order size limits
+- Total exposure caps
+- Per-market position limits
+- Minimum liquidity requirements
+- Maximum spread tolerance
+- Stop-loss / take-profit automation
+- Preview mode (default) — no real money
 
-### Copy Trading
-| Tool | Description |
-|------|-------------|
-| `watch_wallet` | Add/remove traders from watchlist |
-| `start_monitor` | Start copy trading loop |
-| `stop_monitor` | Stop copy trading loop |
-| `rebalance` | Remove underperforming traders |
-
-### Analysis
-| Tool | Description |
-|------|-------------|
-| `analyze_trader` | Detailed trader profile with win rate and P&L |
-| `score_trader` | Conviction score (0-100) across 5 dimensions |
-| `backtest_trader` | Simulate copying past trades |
-| `check_market` | Market quality check (spread, depth) |
-| `get_price` | Live bid/ask/spread prices |
-| `get_price_history` | Historical prices with sparkline (1h-1m) |
-
-### Portfolio
-| Tool | Description |
-|------|-------------|
-| `get_balance` | Account balance, budget, and P&L summary |
-| `get_portfolio` | Multi-wallet overview with P&L per trader |
-| `get_positions` | Open/closed positions |
-| `close_position` | Manually close a position |
-| `set_exit_rules` | Set stop-loss and take-profit levels |
-| `check_exits` | Check positions for resolution |
-| `watch_market` | Market watchlist with price alerts |
-
-### Utilities
-| Tool | Description |
-|------|-------------|
-| `get_dashboard` | Terminal-formatted dashboard |
-| `get_trade_history` | Trade history with filters |
-| `set_config` | Update bot settings |
-| `list_watchlist` | Show watched wallets |
-| `log_cycle` | Log agent cycle for dashboard tracking |
-
-## Free vs Pro
-
-| Feature | Free | Pro |
-|---------|------|-----|
-| Search & discover markets | Full | Full |
-| Buy / sell (preview mode) | Full | Full |
-| Buy / sell (live mode) | - | Full |
-| Price & market quality | Full | Full |
-| Price history | Full | Full |
-| Discover traders | 1 page | Full |
-| Watch wallets | 3 max | Unlimited |
-| Analyze trader (basic) | Full | Full |
-| Score trader | - | Full |
-| Backtest trader | - | Full |
-| Smart money flow | - | Full |
-| Copy trading monitor | - | Full |
-| Portfolio overview | - | Full |
-| Market watchlist & alerts | - | Full |
-| Stop-loss / take-profit | - | Full |
-| Rebalance | - | Full |
-| Trade history | - | Full |
-
-Get a Pro license at [mcp-marketplace.io](https://mcp-marketplace.io/server/polymarket-trader-mcp).
+---
 
 ## Development
 
@@ -153,6 +241,8 @@ npm run build
 npm test         # 200+ tests
 ```
 
+---
+
 ## License
 
-MIT
+MIT - see [LICENSE](LICENSE)
