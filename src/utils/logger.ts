@@ -21,12 +21,9 @@ export function log(level: LogLevel, message: string, data?: Record<string, unkn
   if (logs.length > MAX_LOGS) {
     logs.splice(0, logs.length - MAX_LOGS);
   }
+  // MCP uses stdout for JSON-RPC — all logs MUST go to stderr
   const prefix = `[${entry.timestamp}] [${level.toUpperCase()}]`;
-  if (level === "error") {
-    console.error(`${prefix} ${message}`, data ?? "");
-  } else {
-    console.log(`${prefix} ${message}`, data ?? "");
-  }
+  process.stderr.write(`${prefix} ${message}${data ? " " + JSON.stringify(data) : ""}\n`);
 }
 
 export function getRecentLogs(count = 50): LogEntry[] {

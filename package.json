@@ -7,7 +7,7 @@
     "polymarket-copy-trader": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/web/public dist/web/public",
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "test": "vitest run",
@@ -28,6 +28,7 @@
   },
   "files": [
     "dist/**/*",
+    "src/web/public/**/*",
     "LAUNCHGUIDE.md",
     "README.md"
   ],
