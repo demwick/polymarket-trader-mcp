@@ -305,7 +305,7 @@ server.tool(
 
 // Start MCP server
 async function main() {
-  log("info", "Starting Polymarket Copy Trader MCP Server");
+  log("info", "Starting Polymarket Trader MCP Server");
   log("info", `Mode: ${config.COPY_MODE} | Budget: $${config.DAILY_BUDGET}/day`);
 
   if (config.COPY_MODE === "live" && !hasLiveCredentials()) {
