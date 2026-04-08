@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { z } from "zod";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const configSchema = z.object({
   POLY_PRIVATE_KEY: z.string().optional().default(""),
