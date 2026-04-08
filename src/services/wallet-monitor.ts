@@ -3,6 +3,7 @@ import { getWatchlist, updateLastChecked, hasExistingPosition } from "../db/quer
 import { BudgetManager } from "./budget-manager.js";
 import { TradeExecutor, type TradeOrder } from "./trade-executor.js";
 import { resolveMarketByConditionId } from "./market-resolver.js";
+import { PositionTracker } from "./position-tracker.js";
 import { log } from "../utils/logger.js";
 
 const DATA_API_BASE = "https://data-api.polymarket.com";
@@ -79,7 +80,8 @@ export class WalletMonitor {
     private budgetManager: BudgetManager,
     private tradeExecutor: TradeExecutor,
     private minConviction: number,
-    private maxAgeSeconds: number = 300
+    private maxAgeSeconds: number = 300,
+    private positionTracker?: PositionTracker
   ) {}
 
   start(intervalMs: number = 30_000): void {
@@ -108,6 +110,18 @@ export class WalletMonitor {
   }
 
   private async tick(): Promise<void> {
+    // Check exits first
+    if (this.positionTracker) {
+      try {
+        const closed = await this.positionTracker.checkExits();
+        if (closed > 0) {
+          log("monitor", `Closed ${closed} positions (trader exit or market resolve)`);
+        }
+      } catch (err) {
+        log("error", `Position tracking error: ${err}`);
+      }
+    }
+
     const watchlist = getWatchlist(this.db);
     if (watchlist.length === 0) {
       log("monitor", "Watchlist empty, skipping tick");

@@ -23,6 +23,12 @@ import { tradeHistorySchema, handleGetTradeHistory } from "./tools/get-trade-his
 import { setConfigSchema, handleSetConfig } from "./tools/set-config.js";
 import { goLiveSchema, handleGoLive } from "./tools/go-live.js";
 
+import { PositionTracker } from "./services/position-tracker.js";
+import { analyzeTraderSchema, handleAnalyzeTrader } from "./tools/analyze-trader.js";
+import { getTraderPositionsSchema, handleGetTraderPositions } from "./tools/get-trader-positions.js";
+import { getPositionsSchema, handleGetPositions } from "./tools/get-positions.js";
+import { closePositionSchema, handleClosePosition } from "./tools/close-position.js";
+
 import { startWebDashboard } from "./web/server.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,7 +40,8 @@ initializeDb(db);
 
 const budgetManager = new BudgetManager(db, config.DAILY_BUDGET);
 const tradeExecutor = new TradeExecutor(db, config.COPY_MODE);
-const walletMonitor = new WalletMonitor(db, budgetManager, tradeExecutor, config.MIN_CONVICTION);
+const positionTracker = new PositionTracker(db);
+const walletMonitor = new WalletMonitor(db, budgetManager, tradeExecutor, config.MIN_CONVICTION, 300, positionTracker);
 
 const server = new McpServer({
   name: "polymarket-copy-trader",
@@ -102,6 +109,34 @@ server.tool(
   "Switch from preview to live mode — requires API credentials in .env (Pro)",
   goLiveSchema.shape,
   async (input) => ({ content: [{ type: "text" as const, text: await handleGoLive(tradeExecutor, goLiveSchema.parse(input)) }] })
+);
+
+server.tool(
+  "analyze_trader",
+  "Get detailed analysis of a trader's profile, win rate, and recent activity",
+  analyzeTraderSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeTrader(analyzeTraderSchema.parse(input)) }] })
+);
+
+server.tool(
+  "get_trader_positions",
+  "View a trader's current open positions on Polymarket (Pro)",
+  getTraderPositionsSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleGetTraderPositions(getTraderPositionsSchema.parse(input)) }] })
+);
+
+server.tool(
+  "get_positions",
+  "View your copy trading positions — open, closed, or all",
+  getPositionsSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleGetPositions(db, getPositionsSchema.parse(input)) }] })
+);
+
+server.tool(
+  "close_position",
+  "Manually close a copy trading position (Pro)",
+  closePositionSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleClosePosition(db, closePositionSchema.parse(input)) }] })
 );
 
 // Start web dashboard
