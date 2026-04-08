@@ -1,46 +1,66 @@
-# Polymarket Copy Trader
+# Polymarket MCP Server
 
 ## Tagline
-AI-powered copy trading bot for Polymarket prediction markets
+Trade, analyze, and automate Polymarket prediction markets via AI
 
 ## Description
-Discover top Polymarket traders from the leaderboard, monitor their wallets, and automatically copy their trades proportionally. Runs as an MCP server controlled via natural language through Claude Code, Cursor, or any MCP-compatible AI assistant. Includes preview mode for risk-free simulation and a real-time web dashboard.
+Full-featured MCP server for Polymarket — search markets, execute trades, copy top traders, analyze smart money flow, backtest strategies, and manage your portfolio. All through natural language via Claude Code, Cursor, or any MCP-compatible AI assistant. Includes 34 tools spanning direct trading, market discovery, trader analysis, copy trading automation, and portfolio management with stop-loss/take-profit.
 
 ## Setup Requirements
-- `MCP_LICENSE_KEY` (optional): License key for Pro features. Get it at https://mcp-marketplace.io/server/polymarket-copy-trader
-- `POLY_PRIVATE_KEY` (optional): Your Polygon wallet private key for live trading
-- `POLY_API_KEY` (optional): Polymarket CLOB API key for live trading
-- `POLY_API_SECRET` (optional): Polymarket CLOB API secret for live trading
-- `POLY_API_PASSPHRASE` (optional): Polymarket CLOB API passphrase for live trading
+- `MCP_LICENSE_KEY` (optional): License key for Pro features. Get it at https://mcp-marketplace.io/server/polymarket-mcp
+- `COPY_MODE` (optional): Set to `preview` (default, simulated) or `live` (real orders)
+- `DAILY_BUDGET` (optional): Max daily spend in USDC (default: $20)
+- `POLY_PRIVATE_KEY` (optional): Polygon wallet private key — required for live trading
+- `POLY_API_KEY` (optional): Polymarket CLOB API key — required for live trading
+- `POLY_API_SECRET` (optional): Polymarket CLOB API secret — required for live trading
+- `POLY_API_PASSPHRASE` (optional): Polymarket CLOB API passphrase — required for live trading
 
 ## Category
 Finance
 
 ## Features
-- Discover top traders from Polymarket leaderboard by PnL and volume
-- Monitor selected traders' wallets every 30 seconds for new BUY trades
-- Copy trades proportionally with conviction-based sizing
-- Preview mode simulates all trades without real money (default)
-- Live mode executes real orders via Polymarket CLOB API
-- Real-time web dashboard at localhost:3847
-- Daily budget management with configurable limits
-- Filters: BUY-only, max 5 min age, minimum conviction ($3-5)
-- Free tier: discover traders, basic watchlist, dashboard overview
-- Pro tier: unlimited watchlist, auto-monitoring, copy trading, live mode
+- Search and discover Polymarket markets by keyword, category, or end date
+- Buy and sell directly on any market with market or limit orders
+- Discover top traders from the leaderboard by PnL and volume
+- Smart money flow detection — find markets where multiple top traders are buying
+- Copy trading with automatic wallet monitoring and proportional sizing
+- Conviction scoring (0-100) across 5 dimensions for any trader
+- Backtest any trader's history to simulate copy results before committing
+- Market quality filter — auto-skip illiquid markets (spread, depth, price checks)
+- Stop-loss and take-profit automation on any position
+- Multi-wallet portfolio overview with per-trader P&L breakdown
+- Auto-rebalance — remove underperforming traders based on score thresholds
+- Price history with OHLC and sparkline charts (1h to 1m intervals)
+- Market watchlist with configurable price alerts
+- WTA tennis market discovery with stink bid pricing
+- Preview mode for risk-free simulation (default)
+- Live mode for real order execution via Polymarket CLOB API
+- Daily budget management with conviction-based multipliers
+- Separate monitoring dashboard (polymarket-dashboard project)
+- Free tier: market search, basic discovery, 3 wallet watchlist
+- Pro tier: full copy trading, backtest, smart flow, rebalance, unlimited wallets
 
 ## Getting Started
-- "Find the best Polymarket traders" — discovers top performers from the leaderboard
-- "Add 0xABC...DEF to my watchlist" — starts tracking a trader's wallet
-- "Show my watchlist" — displays all tracked wallets
-- "Start monitoring" — begins 30-second copy trading loop (Pro)
-- "Show me the dashboard" — displays real-time stats and trade history
-- Tool: discover_traders — Scan leaderboard for top traders by PnL
-- Tool: watch_wallet — Add/remove wallet from monitoring list
-- Tool: start_monitor — Begin automatic copy trading (Pro)
-- Tool: get_dashboard — Real-time performance overview
+- "Search for bitcoin markets" — finds active Polymarket markets about Bitcoin
+- "Buy $5 on this market" — places a direct trade (preview mode by default)
+- "Find the best traders this week" — discovers top performers from leaderboard
+- "Score this trader" — calculates conviction score (0-100) with breakdown
+- "Backtest this trader with $10 per trade" — simulates copying their past trades
+- "Show smart money flow" — scans top 30 traders for convergence signals
+- "Check market quality" — analyzes spread, depth, and liquidity
+- "Set stop loss at 0.30 on position #1" — automated exit rule
+- "Show my portfolio" — multi-wallet overview with P&L
+- "Rebalance my watchlist" — remove underperforming traders
+- Tool: search_markets — Keyword search across all markets
+- Tool: buy — Direct buy on any market
+- Tool: sell — Sell an open position
+- Tool: discover_flow — Smart money convergence signals
+- Tool: score_trader — Conviction scoring with visual bars
+- Tool: backtest_trader — Historical trade simulation
+- Tool: get_price_history — Price charts with sparklines
 
 ## Tags
-polymarket, copy-trading, prediction-markets, trading-bot, defi, polygon, crypto, ai-agent, mcp, finance
+polymarket, trading, prediction-markets, mcp, finance, copy-trading, smart-money, backtest, ai-agent, defi, crypto, portfolio, market-analysis, automation
 
 ## Documentation URL
-https://github.com/talhademirel/polymarket-copy-trader
+https://github.com/demwick/polymarket-mcp
