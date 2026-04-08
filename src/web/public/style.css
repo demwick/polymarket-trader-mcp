@@ -59,18 +59,23 @@ header h1 { font-size: 1.4em; color: #fff; }
 
 .stat-card .value { font-size: 1.3em; font-weight: bold; color: #fff; }
 
+.monitor-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 #monitor-btn {
-  margin-top: 8px;
-  padding: 6px 16px;
+  padding: 4px 14px;
   border: none;
   border-radius: 4px;
   font-weight: bold;
-  font-size: 0.8em;
+  font-size: 0.75em;
   cursor: pointer;
   background: #1a3a1a;
   color: #4ade80;
   letter-spacing: 0.5px;
-  width: 100%;
+  white-space: nowrap;
 }
 
 #monitor-btn:hover { opacity: 0.85; }
