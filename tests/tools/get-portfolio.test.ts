@@ -1,8 +1,13 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import Database from "better-sqlite3";
 import { initializeDb } from "../../src/db/schema.js";
 import { handleGetPortfolio } from "../../src/tools/get-portfolio.js";
 import { addToWatchlist, recordTrade, updateTradeExit } from "../../src/db/queries.js";
+
+vi.mock("../../src/utils/license.js", () => ({
+  checkLicense: vi.fn().mockResolvedValue(true),
+  requirePro: vi.fn((name: string) => `${name} requires Pro`),
+}));
 
 describe("handleGetPortfolio", () => {
   let db: Database.Database;

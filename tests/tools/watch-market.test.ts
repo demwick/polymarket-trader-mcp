@@ -4,6 +4,11 @@ import { initializeDb } from "../../src/db/schema.js";
 import { handleWatchMarket } from "../../src/tools/watch-market.js";
 import { getMarketWatchlist } from "../../src/db/queries.js";
 
+vi.mock("../../src/utils/license.js", () => ({
+  checkLicense: vi.fn().mockResolvedValue(true),
+  requirePro: vi.fn((name: string) => `${name} requires Pro`),
+}));
+
 vi.mock("../../src/services/price-service.js", () => ({
   getMarketPriceByCondition: vi.fn().mockResolvedValue({ price: 0.55, tokenId: "tok1" }),
 }));

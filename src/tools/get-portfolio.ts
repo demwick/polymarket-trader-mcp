@@ -1,7 +1,10 @@
 import Database from "better-sqlite3";
 import { getPortfolioByWallet, getTradeStats, getOpenPositions } from "../db/queries.js";
+import { checkLicense, requirePro } from "../utils/license.js";
 
 export async function handleGetPortfolio(db: Database.Database): Promise<string> {
+  const isPro = await checkLicense();
+  if (!isPro) return requirePro("get_portfolio");
   const wallets = getPortfolioByWallet(db);
   const globalStats = getTradeStats(db);
   const openPositions = getOpenPositions(db);

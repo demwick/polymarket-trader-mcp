@@ -123,13 +123,23 @@ cp .env.example .env
 
 | Feature | Free | Pro |
 |---------|------|-----|
+| Search & discover markets | Full | Full |
+| Buy / sell (preview mode) | Full | Full |
+| Buy / sell (live mode) | - | Full |
+| Price & market quality | Full | Full |
+| Price history | Full | Full |
 | Discover traders | 1 page | Full |
 | Watch wallets | 3 max | Unlimited |
-| Monitor | - | Full |
-| Trade history | - | Full |
-| Backtest | - | Full |
-| Smart flow | - | Full |
+| Analyze trader (basic) | Full | Full |
+| Score trader | - | Full |
+| Backtest trader | - | Full |
+| Smart money flow | - | Full |
+| Copy trading monitor | - | Full |
+| Portfolio overview | - | Full |
+| Market watchlist & alerts | - | Full |
+| Stop-loss / take-profit | - | Full |
 | Rebalance | - | Full |
+| Trade history | - | Full |
 
 Get a Pro license at [mcp-marketplace.io](https://mcp-marketplace.io/server/polymarket-mcp).
 

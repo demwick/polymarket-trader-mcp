@@ -1,11 +1,14 @@
 import { z } from "zod";
 import { scoreTrader } from "../services/conviction-scorer.js";
+import { checkLicense, requirePro } from "../utils/license.js";
 
 export const scoreTraderSchema = z.object({
   address: z.string(),
 });
 
 export async function handleScoreTrader(input: z.infer<typeof scoreTraderSchema>): Promise<string> {
+  const isPro = await checkLicense();
+  if (!isPro) return requirePro("score_trader");
   const result = await scoreTrader(input.address);
 
   const bar = (val: number, max: number) => {
