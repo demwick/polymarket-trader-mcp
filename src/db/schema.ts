@@ -63,6 +63,17 @@ export function initializeDb(db: Database.Database): void {
       created_at TEXT DEFAULT (datetime('now'))
     );
 
+    CREATE TABLE IF NOT EXISTS market_watchlist (
+      condition_id TEXT PRIMARY KEY,
+      token_id TEXT,
+      title TEXT,
+      slug TEXT,
+      alert_below REAL,
+      alert_above REAL,
+      last_price REAL,
+      added_at TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_trades_condition_id ON trades(condition_id);
     CREATE INDEX IF NOT EXISTS idx_trades_trader_address ON trades(trader_address);
     CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status);

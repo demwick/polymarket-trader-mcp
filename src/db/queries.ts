@@ -221,6 +221,38 @@ export function getPortfolioByWallet(db: Database.Database): WalletPortfolio[] {
   });
 }
 
+// ---- Market Watchlist ----
+
+export interface MarketWatch {
+  condition_id: string;
+  token_id: string | null;
+  title: string | null;
+  slug: string | null;
+  alert_below: number | null;
+  alert_above: number | null;
+  last_price: number | null;
+  added_at?: string;
+}
+
+export function addMarketWatch(db: Database.Database, entry: Omit<MarketWatch, "added_at">): void {
+  db.prepare(`
+    INSERT OR REPLACE INTO market_watchlist (condition_id, token_id, title, slug, alert_below, alert_above, last_price)
+    VALUES (@condition_id, @token_id, @title, @slug, @alert_below, @alert_above, @last_price)
+  `).run(entry);
+}
+
+export function removeMarketWatch(db: Database.Database, conditionId: string): void {
+  db.prepare("DELETE FROM market_watchlist WHERE condition_id = ?").run(conditionId);
+}
+
+export function getMarketWatchlist(db: Database.Database): MarketWatch[] {
+  return db.prepare("SELECT * FROM market_watchlist ORDER BY added_at DESC").all() as MarketWatch[];
+}
+
+export function updateMarketWatchPrice(db: Database.Database, conditionId: string, price: number): void {
+  db.prepare("UPDATE market_watchlist SET last_price = ? WHERE condition_id = ?").run(price, conditionId);
+}
+
 /** Daily P&L history for charting — returns cumulative running total */
 export function getDailyPnlHistory(db: Database.Database): { date: string; pnl: number; cumulative: number }[] {
   const rows = db.prepare(`

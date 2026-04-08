@@ -64,11 +64,18 @@ export async function analyzeTrader(address: string, detailed: boolean): Promise
     ? trades.reduce((sum: number, t: RecentTrade) => sum + t.size * t.price, 0) / trades.length
     : 0;
 
+  // Calculate estimated P&L from closed trades (sells with matching buys)
+  const totalPnl = sells.reduce((sum: number, s: RecentTrade) => {
+    const entry = avgEntry.get(s.title);
+    if (entry === undefined || entry === 0) return sum;
+    return sum + ((s.price - entry) * s.size);
+  }, 0);
+
   return {
     address,
     activePositions: positions.length,
     recentTrades: detailed ? trades.slice(0, 10) : [],
-    totalPnl: 0,
+    totalPnl,
     winRate,
     avgPositionSize: avgSize,
   };

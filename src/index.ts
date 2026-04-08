@@ -40,6 +40,8 @@ import { handleGetPortfolio } from "./tools/get-portfolio.js";
 import { backtestTraderSchema, handleBacktestTrader } from "./tools/backtest-trader.js";
 import { discoverFlowSchema, handleDiscoverFlow } from "./tools/discover-flow.js";
 import { getPriceHistorySchema, handleGetPriceHistory } from "./tools/get-price-history.js";
+import { watchMarketSchema, handleWatchMarket } from "./tools/watch-market.js";
+import { rebalanceSchema, handleRebalance } from "./tools/rebalance.js";
 import { scoreTraderSchema, handleScoreTrader } from "./tools/score-trader.js";
 import { checkMarketSchema, handleCheckMarket } from "./tools/check-market.js";
 
@@ -248,6 +250,20 @@ server.tool(
   "Get historical price data for a market token (1h/6h/1d/1w/1m intervals with sparkline)",
   getPriceHistorySchema.shape,
   async (input) => ({ content: [{ type: "text" as const, text: await handleGetPriceHistory(getPriceHistorySchema.parse(input)) }] })
+);
+
+server.tool(
+  "watch_market",
+  "Add/remove/list markets on your market watchlist with optional price alerts",
+  watchMarketSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleWatchMarket(db, watchMarketSchema.parse(input)) }] })
+);
+
+server.tool(
+  "rebalance",
+  "Analyze watchlist traders and remove underperformers based on conviction score and win rate (Pro)",
+  rebalanceSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleRebalance(db, rebalanceSchema.parse(input)) }] })
 );
 
 // Start MCP server
