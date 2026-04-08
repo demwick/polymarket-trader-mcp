@@ -173,3 +173,20 @@ export function getPositionsByStatus(
   }
   return db.prepare("SELECT * FROM trades ORDER BY created_at DESC").all() as TradeRecord[];
 }
+
+/** Daily P&L history for charting — returns cumulative running total */
+export function getDailyPnlHistory(db: Database.Database): { date: string; pnl: number; cumulative: number }[] {
+  const rows = db.prepare(`
+    SELECT date(resolved_at) as date, SUM(pnl) as pnl
+    FROM trades
+    WHERE pnl IS NOT NULL AND resolved_at IS NOT NULL
+    GROUP BY date(resolved_at)
+    ORDER BY date ASC
+  `).all() as { date: string; pnl: number }[];
+
+  let cumulative = 0;
+  return rows.map((r) => {
+    cumulative += r.pnl;
+    return { date: r.date, pnl: r.pnl, cumulative };
+  });
+}

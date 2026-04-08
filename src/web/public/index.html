@@ -39,12 +39,33 @@
   </section>
 
   <section id="main-content">
+    <div id="pnl-chart-section">
+      <h2>P&L History</h2>
+      <div id="pnl-chart-container">
+        <canvas id="pnl-chart"></canvas>
+        <p id="no-pnl" class="empty-state">No resolved trades yet</p>
+      </div>
+    </div>
+
+    <div id="positions-section">
+      <h2>Open Positions</h2>
+      <table id="positions-table">
+        <thead>
+          <tr>
+            <th>Market</th><th>Side</th><th>Entry</th><th>Amount</th><th>Trader</th><th>Mode</th><th>Opened</th>
+          </tr>
+        </thead>
+        <tbody id="positions-body"></tbody>
+      </table>
+      <p id="no-positions" class="empty-state">No open positions</p>
+    </div>
+
     <div id="trades-section">
       <h2>Recent Trades</h2>
       <table id="trades-table">
         <thead>
           <tr>
-            <th>Time</th><th>Trader</th><th>Market</th><th>Price</th><th>Amount</th><th>Status</th>
+            <th>Time</th><th>Trader</th><th>Market</th><th>Price</th><th>Amount</th><th>P&L</th><th>Status</th>
           </tr>
         </thead>
         <tbody id="trades-body"></tbody>

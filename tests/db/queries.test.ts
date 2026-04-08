@@ -19,6 +19,7 @@ import {
   getOpenPositions,
   updateTradeExit,
   getPositionsByStatus,
+  getDailyPnlHistory,
 } from "../../src/db/queries.js";
 
 describe("Database queries", () => {
@@ -224,5 +225,26 @@ describe("Database queries", () => {
     const filtered = getTradeHistory(db, { status: "failed" });
     expect(filtered).toHaveLength(1);
     expect(filtered[0].status).toBe("failed");
+  });
+
+  it("returns daily P&L history with cumulative totals", () => {
+    // Create resolved trades with known dates
+    const id1 = recordTrade(db, { trader_address: "0x1", market_slug: "a", condition_id: "c1", token_id: "t1", side: "BUY", price: 0.5, amount: 10, original_amount: 20, mode: "preview", status: "simulated" });
+    const id2 = recordTrade(db, { trader_address: "0x1", market_slug: "b", condition_id: "c2", token_id: "t2", side: "BUY", price: 0.3, amount: 5, original_amount: 10, mode: "preview", status: "simulated" });
+    const id3 = recordTrade(db, { trader_address: "0x1", market_slug: "c", condition_id: "c3", token_id: "t3", side: "BUY", price: 0.4, amount: 8, original_amount: 15, mode: "preview", status: "simulated" });
+
+    // Resolve them with different dates
+    db.prepare("UPDATE trades SET pnl = 5, status = 'resolved_win', resolved_at = '2026-04-06 10:00:00' WHERE id = ?").run(id1);
+    db.prepare("UPDATE trades SET pnl = -3, status = 'resolved_loss', resolved_at = '2026-04-06 14:00:00' WHERE id = ?").run(id2);
+    db.prepare("UPDATE trades SET pnl = 8, status = 'resolved_win', resolved_at = '2026-04-07 09:00:00' WHERE id = ?").run(id3);
+
+    const history = getDailyPnlHistory(db);
+    expect(history).toHaveLength(2);
+    expect(history[0]).toEqual({ date: "2026-04-06", pnl: 2, cumulative: 2 });
+    expect(history[1]).toEqual({ date: "2026-04-07", pnl: 8, cumulative: 10 });
+  });
+
+  it("returns empty array when no resolved trades", () => {
+    expect(getDailyPnlHistory(db)).toEqual([]);
   });
 });

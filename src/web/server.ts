@@ -2,7 +2,7 @@ import express, { type Request, type Response, type NextFunction } from "express
 import path from "path";
 import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
-import { getWatchlist, getTradeHistory, getTradeStats, addToWatchlist, removeFromWatchlist } from "../db/queries.js";
+import { getWatchlist, getTradeHistory, getTradeStats, addToWatchlist, removeFromWatchlist, getOpenPositions, getDailyPnlHistory } from "../db/queries.js";
 import { BudgetManager } from "../services/budget-manager.js";
 import { WalletMonitor } from "../services/wallet-monitor.js";
 import { TradeExecutor } from "../services/trade-executor.js";
@@ -170,6 +170,26 @@ export function startWebDashboard(
       res.json({ ok: true });
     } catch (err) {
       res.json({ ok: false, error: String(err) });
+    }
+  });
+
+  app.get("/api/positions", (_req, res) => {
+    try {
+      const positions = getOpenPositions(db);
+      res.json({ ok: true, positions });
+    } catch (err) {
+      log("error", `Positions API error: ${err}`);
+      res.status(500).json({ ok: false, error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/pnl-history", (_req, res) => {
+    try {
+      const history = getDailyPnlHistory(db);
+      res.json({ ok: true, history });
+    } catch (err) {
+      log("error", `PnL history API error: ${err}`);
+      res.status(500).json({ ok: false, error: "Internal server error" });
     }
   });
 
