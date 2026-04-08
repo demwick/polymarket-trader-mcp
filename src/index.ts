@@ -37,6 +37,9 @@ import { logCycleSchema, handleLogCycle } from "./tools/log-cycle.js";
 import { handleCheckExits } from "./tools/check-exits.js";
 import { setExitRulesSchema, handleSetExitRules } from "./tools/set-exit-rules.js";
 import { handleGetPortfolio } from "./tools/get-portfolio.js";
+import { backtestTraderSchema, handleBacktestTrader } from "./tools/backtest-trader.js";
+import { scoreTraderSchema, handleScoreTrader } from "./tools/score-trader.js";
+import { checkMarketSchema, handleCheckMarket } from "./tools/check-market.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -208,6 +211,27 @@ server.tool(
   "View multi-wallet portfolio overview with per-wallet P&L, positions, and exit rules",
   {},
   async () => ({ content: [{ type: "text" as const, text: await handleGetPortfolio(db) }] })
+);
+
+server.tool(
+  "backtest_trader",
+  "Simulate copying a trader's past trades to see hypothetical P&L (Pro)",
+  backtestTraderSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleBacktestTrader(backtestTraderSchema.parse(input)) }] })
+);
+
+server.tool(
+  "score_trader",
+  "Calculate conviction score (0-100) for a trader based on win rate, volume, consistency, experience, and diversity",
+  scoreTraderSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleScoreTrader(scoreTraderSchema.parse(input)) }] })
+);
+
+server.tool(
+  "check_market",
+  "Check market quality — spread, liquidity depth, and price range for safe trading",
+  checkMarketSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleCheckMarket(checkMarketSchema.parse(input)) }] })
 );
 
 // Start MCP server

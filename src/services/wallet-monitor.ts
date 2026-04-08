@@ -3,6 +3,7 @@ import { getWatchlist, updateLastChecked, hasExistingPosition } from "../db/quer
 import { BudgetManager } from "./budget-manager.js";
 import { TradeExecutor, type TradeOrder } from "./trade-executor.js";
 import { resolveMarketByConditionId } from "./market-resolver.js";
+import { checkMarketQuality } from "./market-filter.js";
 import { PositionTracker } from "./position-tracker.js";
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
@@ -193,6 +194,14 @@ export class WalletMonitor {
           const marketInfo = trade.slug
             ? null
             : await resolveMarketByConditionId(trade.conditionId);
+
+          // Market quality check — skip illiquid or wide-spread markets
+          const tokenId = marketInfo?.tokenId ?? trade.asset;
+          const quality = await checkMarketQuality(tokenId);
+          if (!quality.pass) {
+            log("monitor", `Skipping ${trade.title} — market quality check failed: ${quality.reasons[0]}`);
+            continue;
+          }
 
           const today = new Date().toISOString().split("T")[0];
 
