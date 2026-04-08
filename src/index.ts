@@ -61,6 +61,9 @@ import { analyzeOpportunitySchema, handleAnalyzeOpportunity } from "./tools/anal
 import { handleAssessRisk } from "./tools/assess-risk.js";
 import { batchOrderSchema, handleBatchOrder } from "./tools/batch-order.js";
 import { setSafetyLimitsSchema, handleSetSafetyLimits } from "./tools/set-safety-limits.js";
+import { handleGetOpenOrders } from "./tools/get-open-orders.js";
+import { getOrderStatusSchema, handleGetOrderStatus } from "./tools/get-order-status.js";
+import { getMarketEventsSchema, handleGetMarketEvents } from "./tools/get-market-events.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -365,6 +368,27 @@ server.tool(
   "Configure trading safety limits — max order size, exposure cap, spread tolerance",
   setSafetyLimitsSchema.shape,
   safe("set_safety_limits", (input) => ({ content: [{ type: "text" as const, text: handleSetSafetyLimits(db, setSafetyLimitsSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "get_open_orders",
+  "View all pending limit orders (live mode only)",
+  {},
+  safe("get_open_orders", async () => ({ content: [{ type: "text" as const, text: await handleGetOpenOrders(tradeExecutor) }] }))
+);
+
+server.tool(
+  "get_order_status",
+  "Check the status of a specific order by ID (live mode only)",
+  getOrderStatusSchema.shape,
+  safe("get_order_status", async (input) => ({ content: [{ type: "text" as const, text: await handleGetOrderStatus(tradeExecutor, getOrderStatusSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "get_market_events",
+  "Browse event groups — find all markets under an event (e.g. 'election', 'UFC', 'NBA')",
+  getMarketEventsSchema.shape,
+  safe("get_market_events", async (input) => ({ content: [{ type: "text" as const, text: await handleGetMarketEvents(getMarketEventsSchema.parse(input)) }] }))
 );
 
 // Start MCP server
