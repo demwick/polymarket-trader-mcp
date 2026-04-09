@@ -34,6 +34,6 @@ export async function handleGetOpenOrders(executor: TradeExecutor): Promise<stri
     return output;
   } catch (err: any) {
     log("error", `Get open orders failed: ${err}`);
-    return "Could not fetch open orders. Check your API credentials.";
+    return "Could not fetch open orders. Verify your trading configuration is correct.";
   }
 }

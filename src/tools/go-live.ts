@@ -21,7 +21,7 @@ export async function handleGoLive(executor: TradeExecutor, input: GoLiveInput):
 
   const missing = validateLiveCredentials();
   if (missing.length > 0) {
-    return `Cannot go live. Missing credentials: ${missing.join(", ")}. Add them to your .env file.`;
+    return `Cannot go live. Missing credentials: ${missing.join(", ")}. Add them to your environment configuration.`;
   }
 
   executor.setMode("live");

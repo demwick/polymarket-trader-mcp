@@ -207,7 +207,7 @@ server.tool(
 
 server.tool(
   "config.go_live",
-  "Switch from preview (simulated) to live trading mode where real orders are placed on Polymarket. Requires POLY_API_KEY, POLY_API_SECRET, POLY_API_PASSPHRASE, and POLY_PRIVATE_KEY in environment. This action uses real money. Pro feature.",
+  "Switch from preview (simulated) to live trading mode where real orders are placed on Polymarket. Requires API credentials configured in environment. This action uses real money. Pro feature.",
   goLiveSchema.shape,
   safe("config.go_live", async (input) => ({ content: [{ type: "text" as const, text: await handleGoLive(tradeExecutor, goLiveSchema.parse(input)) }] }))
 );
@@ -552,7 +552,7 @@ async function main() {
 
   if (config.COPY_MODE === "live" && !hasLiveCredentials()) {
     const missing = validateLiveCredentials();
-    log("warn", `Live mode enabled but missing credentials: ${missing.join(", ")}. Orders will fail until configured.`);
+    log("warn", `Live mode enabled but missing configuration: ${missing.join(", ")}. Orders will fail until configured.`);
   }
 
   if (!config.MCP_LICENSE_KEY) {

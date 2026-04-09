@@ -34,6 +34,6 @@ export async function handleGetOrderStatus(executor: TradeExecutor, input: z.inf
     return output;
   } catch (err: any) {
     log("error", `Get order status failed: ${err}`);
-    return "Could not fetch order status. Check the order ID and your API credentials.";
+    return "Could not fetch order status. Check the order ID and verify your trading configuration.";
   }
 }

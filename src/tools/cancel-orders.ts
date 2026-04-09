@@ -24,7 +24,7 @@ export async function handleCancelOrders(executor: TradeExecutor): Promise<strin
     return `Cancelled ${result.cancelled} open orders.`;
   } catch (err: any) {
     log("error", `Cancel orders failed: ${err}`);
-    const hint = err?.message?.includes("credentials") ? " Check your API credentials in .env." : "";
+    const hint = err?.message?.includes("credentials") ? " Verify your API credentials are configured correctly." : "";
     return `Failed to cancel orders. The Polymarket API returned an error.${hint} Check the event log for details.`;
   }
 }
