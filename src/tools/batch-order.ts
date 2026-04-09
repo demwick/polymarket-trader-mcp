@@ -2,6 +2,7 @@ import { z } from "zod";
 import Database from "better-sqlite3";
 import { TradeExecutor } from "../services/trade-executor.js";
 import { resolveMarketByConditionId } from "../services/market-resolver.js";
+import { checkSafetyLimits } from "../utils/safety.js";
 import { log } from "../utils/logger.js";
 
 const orderSchema = z.object({
@@ -26,6 +27,14 @@ export async function handleBatchOrder(db: Database.Database, executor: TradeExe
       if (!marketInfo) {
         results.push({ market: order.condition_id.slice(0, 12) + "...", status: "failed", message: "Could not resolve market" });
         continue;
+      }
+
+      if (order.side === "BUY") {
+        const safety = checkSafetyLimits(db, { amount: order.amount, conditionId: order.condition_id });
+        if (!safety.pass) {
+          results.push({ market: marketInfo.slug?.slice(0, 25) ?? order.condition_id.slice(0, 12), status: "failed", message: `Safety: ${safety.reason}` });
+          continue;
+        }
       }
 
       const tradeOrder = {

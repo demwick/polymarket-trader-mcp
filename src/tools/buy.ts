@@ -4,6 +4,7 @@ import { TradeExecutor, type TradeOrder } from "../services/trade-executor.js";
 import { resolveMarketByConditionId } from "../services/market-resolver.js";
 import { checkMarketQuality } from "../services/market-filter.js";
 import { checkLicense, requirePro } from "../utils/license.js";
+import { checkSafetyLimits } from "../utils/safety.js";
 import { log } from "../utils/logger.js";
 
 export const buySchema = z.object({
@@ -27,6 +28,11 @@ export async function handleBuy(db: Database.Database, executor: TradeExecutor, 
   const quality = await checkMarketQuality(marketInfo.tokenId);
   if (!quality.pass) {
     return `Market quality check failed:\n${quality.reasons.map((r) => "- " + r).join("\n")}\n\nUse \`check_market\` for details or proceed with caution.`;
+  }
+
+  const safety = checkSafetyLimits(db, { amount: input.amount, conditionId: input.condition_id });
+  if (!safety.pass) {
+    return `Safety limit exceeded: ${safety.reason}\n\nUse \`set_safety_limits show=true\` to review limits.`;
   }
 
   const price = input.price ?? quality.metrics.midPrice;
