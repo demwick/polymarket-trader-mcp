@@ -4,17 +4,17 @@
   <img src="https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp/badges/card.svg" alt="polymarket-trader-mcp MCP server" />
 </a>
 
-[![MCP Marketplace](https://mcp-marketplace.io/api/badge?slug=polymarket-mcp-server)](https://mcp-marketplace.io/server/polymarket-mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-18%2B-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org)
 [![MCP Protocol](https://img.shields.io/badge/MCP-1.0-purple)](https://modelcontextprotocol.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-200%2B%20passing-brightgreen)]()
 [![Tools](https://img.shields.io/badge/tools-48-orange)]()
+[![Tests](https://img.shields.io/badge/tests-200%2B%20passing-brightgreen)]()
 [![SafeSkill 94/100](https://img.shields.io/badge/SafeSkill-94%2F100_Verified%20Safe-brightgreen)](https://safeskill.dev/scan/demwick-polymarket-trader-mcp)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/demwick/polymarket-trader-mcp/badge)](https://securityscorecards.dev/viewer/?uri=github.com/demwick/polymarket-trader-mcp)
 [![Socket Badge](https://socket.dev/api/badge/npm/package/polymarket-trader-mcp)](https://socket.dev/npm/package/polymarket-trader-mcp)
 [![Snyk](https://snyk.io/test/github/demwick/polymarket-trader-mcp/badge.svg)](https://snyk.io/test/github/demwick/polymarket-trader-mcp)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/demwick/polymarket-trader-mcp/badge)](https://securityscorecards.dev/viewer/?uri=github.com/demwick/polymarket-trader-mcp)
+[![MCP Marketplace](https://mcp-marketplace.io/api/badge?slug=polymarket-mcp-server)](https://mcp-marketplace.io/server/polymarket-mcp-server)
 
 **Trade, analyze, and automate Polymarket prediction markets through AI.**
 
