@@ -17,7 +17,7 @@ if [ "$NODE_VERSION" -lt 18 ]; then
 fi
 
 echo "[1/3] Installing polymarket-trader-mcp..."
-npm install -g polymarket-trader-mcp
+npm install -g polymarket-trader-mcp@1.5.1
 
 echo "[2/3] Creating config directory..."
 mkdir -p ~/.polymarket-trader
@@ -58,6 +58,6 @@ if command -v polymarket-trader-mcp &> /dev/null; then
   echo ""
   echo "Or run directly: npx polymarket-trader-mcp"
 else
-  echo "Installation failed. Try: npm install -g polymarket-trader-mcp"
+  echo "Installation failed. Try: npm install -g polymarket-trader-mcp@1.5.1"
   exit 1
 fi
