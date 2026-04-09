@@ -11,7 +11,10 @@
     "properties": {
       "COPY_MODE": {
         "type": "string",
-        "enum": ["preview", "live"],
+        "enum": [
+          "preview",
+          "live"
+        ],
         "default": "preview",
         "description": "Trading mode: preview (simulated) or live (real orders on Polymarket)"
       },
