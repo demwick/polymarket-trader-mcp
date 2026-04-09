@@ -37,12 +37,6 @@ The most comprehensive MCP server for Polymarket — 48 tools spanning direct tr
 
 ## Quick Start
 
-### One-Line Install
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/demwick/polymarket-trader-mcp/main/install.sh | bash
-```
-
 ### npm Install
 
 ```bash
