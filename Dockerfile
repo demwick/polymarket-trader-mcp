@@ -18,6 +18,7 @@ ENV NODE_ENV=production
 ENV COPY_MODE=preview
 ENV DAILY_BUDGET=20
 ENV PORT=3000
+ENV DB_PATH=/app/data/copytrader.db
 
 EXPOSE 3000
 

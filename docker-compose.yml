@@ -6,6 +6,7 @@ services:
       - COPY_MODE=preview
       - DAILY_BUDGET=20
       - MIN_CONVICTION=3
+      - DB_PATH=/app/data/copytrader.db
     env_file:
       - .env
     volumes:

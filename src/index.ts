@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { completable } from "@modelcontextprotocol/sdk/server/completable.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "http";
@@ -120,7 +121,18 @@ server.prompt(
 server.prompt(
   "evaluate-trader",
   "Deep evaluation of a trader before adding to watchlist",
-  { address: z.string().describe("Ethereum wallet address of the trader to evaluate") },
+  {
+    address: completable(
+      z.string().describe("Ethereum wallet address of the trader to evaluate"),
+      (value) => {
+        const rows = getWatchlist(db);
+        const addresses = rows.map(r => r.address);
+        if (!value) return addresses;
+        const lower = value.toLowerCase();
+        return addresses.filter(a => a.toLowerCase().startsWith(lower));
+      }
+    ),
+  },
   (input) => ({
     messages: [{
       role: "user" as const,
