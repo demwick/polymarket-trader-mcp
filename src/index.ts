@@ -469,7 +469,15 @@ async function startHttpServer() {
 
     // MCP endpoint
     if (url.pathname === "/mcp") {
-      await httpTransport.handleRequest(req, res);
+      try {
+        await httpTransport.handleRequest(req, res);
+      } catch (err) {
+        log("error", `MCP request error: ${err}`);
+        if (!res.headersSent) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+      }
       return;
     }
 
