@@ -8,6 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-200%2B%20passing-brightgreen)]()
 [![Tools](https://img.shields.io/badge/tools-49-orange)]()
+[![SafeSkill 94/100](https://img.shields.io/badge/SafeSkill-94%2F100_Verified%20Safe-brightgreen)](https://safeskill.dev/scan/demwick-polymarket-trader-mcp)
 
 
 
