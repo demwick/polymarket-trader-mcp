@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-200%2B%20passing-brightgreen)]()
 [![Tools](https://img.shields.io/badge/tools-49-orange)]()
-
+[![polymarket-trader-mcp MCP server](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp/badges/card.svg)](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp)
 
 
 **Trade, analyze, and automate Polymarket prediction markets through AI.**
