@@ -185,14 +185,14 @@ server.tool(
 );
 
 server.tool(
-  "dashboard.get",
+  "config.dashboard",
   "Get a comprehensive dashboard showing daily budget usage, total P&L, recent trades, watchlist status, and monitor state. No parameters needed. Use this for a quick overview of your trading activity.",
   {},
   safe("dashboard.get", async () => ({ content: [{ type: "text" as const, text: await handleGetDashboard(db, budgetManager, walletMonitor, tradeExecutor.getMode()) }] }))
 );
 
 server.tool(
-  "trades.history",
+  "config.history",
   "Retrieve past copy trades from the database with optional filters by trader address or status. Returns trade details including entry price, P&L, and market info. Pro feature.",
   tradeHistorySchema.shape,
   safe("trades.history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTradeHistory(db, tradeHistorySchema.parse(input)) }] }))
@@ -283,7 +283,7 @@ server.tool(
 );
 
 server.tool(
-  "agent.log_cycle",
+  "config.log_cycle",
   "Record an AI agent's trading cycle metrics to the database for dashboard tracking and performance analysis. Stores PnL, win rate, positions, budget usage, and notes. Call this after each automated trading cycle.",
   logCycleSchema.shape,
   safe("agent.log_cycle", (input) => ({ content: [{ type: "text" as const, text: handleLogCycle(db, logCycleSchema.parse(input)) }] }))
@@ -318,21 +318,21 @@ server.tool(
 );
 
 server.tool(
-  "markets.check",
+  "analysis.quality",
   "Evaluate market quality by checking bid/ask spread, order book depth, and price range. Returns a pass/fail with specific reasons. Use before placing trades to avoid illiquid or wide-spread markets. Pro feature.",
   checkMarketSchema.shape,
   safe("markets.check", async (input) => ({ content: [{ type: "text" as const, text: await handleCheckMarket(checkMarketSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "flow.discover",
+  "analysis.flow",
   "Scan top leaderboard traders for smart money convergence signals. Identifies markets where multiple top traders are buying the same outcome simultaneously, indicating strong conviction. Pro feature.",
   discoverFlowSchema.shape,
   safe("flow.discover", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverFlow(discoverFlowSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "markets.price_history",
+  "analysis.price_history",
   "Fetch historical OHLC price data for a market token over a configurable time window (1h to 1m). Returns price points with a sparkline visualization showing the price trend. Pro feature.",
   getPriceHistorySchema.shape,
   safe("markets.price_history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPriceHistory(getPriceHistorySchema.parse(input)) }] }))
@@ -381,7 +381,7 @@ server.tool(
 );
 
 server.tool(
-  "markets.arbitrage",
+  "analysis.arbitrage",
   "Scan active Polymarket markets for arbitrage opportunities where YES + NO prices don't sum to $1.00. Returns markets with the price gap and potential profit percentage.",
   detectArbitrageSchema.shape,
   safe("markets.arbitrage", async (input) => ({ content: [{ type: "text" as const, text: await handleDetectArbitrage(detectArbitrageSchema.parse(input)) }] }))
@@ -395,7 +395,7 @@ server.tool(
 );
 
 server.tool(
-  "markets.holders",
+  "analysis.holders",
   "View the largest position holders in a Polymarket market by condition_id. Shows wallet address, position size, and side (YES/NO). Useful for gauging smart money sentiment on a market.",
   getTopHoldersSchema.shape,
   safe("markets.holders", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTopHolders(getTopHoldersSchema.parse(input)) }] }))
@@ -409,7 +409,7 @@ server.tool(
 );
 
 server.tool(
-  "markets.analyze",
+  "analysis.opportunity",
   "Generate a BUY/SELL/HOLD recommendation for a Polymarket market by analyzing price, spread, price trend, and liquidity depth. Returns a score with detailed reasoning. Read-only analysis, does not place trades.",
   analyzeOpportunitySchema.shape,
   safe("markets.analyze", async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeOpportunity(analyzeOpportunitySchema.parse(input)) }] }))
@@ -458,7 +458,7 @@ server.tool(
 );
 
 server.tool(
-  "markets.compare",
+  "analysis.compare",
   "Compare 2-5 Polymarket markets side by side. Shows price, spread, order book depth, volume, and quality score for each market. Useful for choosing the best market to trade among similar options.",
   compareMarketsSchema.shape,
   safe("markets.compare", async (input) => ({ content: [{ type: "text" as const, text: await handleCompareMarkets(compareMarketsSchema.parse(input)) }] }))
