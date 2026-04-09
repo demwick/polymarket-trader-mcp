@@ -14,6 +14,7 @@ const require = createRequire(import.meta.url);
 const pkg = require("../package.json");
 
 import { initializeDb } from "./db/schema.js";
+import { getWatchlist, getOpenPositions } from "./db/queries.js";
 import { getConfig, hasLiveCredentials, validateLiveCredentials } from "./utils/config.js";
 import { log, setMcpServer } from "./utils/logger.js";
 import { safe } from "./utils/tool-wrapper.js";
@@ -470,6 +471,64 @@ server.tool(
   "Manage live WebSocket price subscriptions for real-time market updates. Subscribe to a token_id to start streaming price changes, unsubscribe to stop, or check connection status.",
   watchPriceSchema.shape,
   safe("watch_price", (input) => ({ content: [{ type: "text" as const, text: handleWatchPrice(priceStream, watchPriceSchema.parse(input)) }] }))
+);
+
+// MCP Resources
+server.resource(
+  "watchlist",
+  "polymarket://watchlist",
+  { description: "Current copy trading watchlist with trader addresses, aliases, and performance stats", mimeType: "application/json" },
+  async () => ({
+    contents: [{
+      uri: "polymarket://watchlist",
+      mimeType: "application/json",
+      text: JSON.stringify(getWatchlist(db), null, 2),
+    }],
+  })
+);
+
+server.resource(
+  "positions",
+  "polymarket://positions",
+  { description: "All open trading positions with entry price, current status, and exit rules", mimeType: "application/json" },
+  async () => ({
+    contents: [{
+      uri: "polymarket://positions",
+      mimeType: "application/json",
+      text: JSON.stringify(getOpenPositions(db), null, 2),
+    }],
+  })
+);
+
+server.resource(
+  "budget",
+  "polymarket://budget/today",
+  { description: "Today's budget usage, remaining allowance, and daily limit", mimeType: "application/json" },
+  async () => {
+    const remaining = budgetManager.getRemainingBudget();
+    const today = new Date().toISOString().slice(0, 10);
+    const row = db.prepare("SELECT COALESCE(SUM(amount), 0) as spent FROM daily_budget WHERE date = ?").get(today) as { spent: number };
+    return {
+      contents: [{
+        uri: "polymarket://budget/today",
+        mimeType: "application/json",
+        text: JSON.stringify({ daily_limit: config.DAILY_BUDGET, spent: row.spent, remaining, date: today }, null, 2),
+      }],
+    };
+  }
+);
+
+server.resource(
+  "trades",
+  "polymarket://trades/recent",
+  { description: "Recent trade history with P&L and execution details", mimeType: "application/json" },
+  async () => ({
+    contents: [{
+      uri: "polymarket://trades/recent",
+      mimeType: "application/json",
+      text: JSON.stringify(db.prepare("SELECT * FROM trades ORDER BY created_at DESC LIMIT 50").all(), null, 2),
+    }],
+  })
 );
 
 // Start MCP server

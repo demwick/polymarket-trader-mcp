@@ -1387,5 +1387,10 @@
       ]
     }
   ],
-  "resources": []
+  "resources": [
+    { "uri": "polymarket://watchlist", "name": "watchlist", "description": "Current copy trading watchlist", "mimeType": "application/json" },
+    { "uri": "polymarket://positions", "name": "positions", "description": "Open trading positions", "mimeType": "application/json" },
+    { "uri": "polymarket://budget/today", "name": "budget", "description": "Today's budget usage and remaining", "mimeType": "application/json" },
+    { "uri": "polymarket://trades/recent", "name": "trades", "description": "Recent trade history", "mimeType": "application/json" }
+  ]
 }
