@@ -106,12 +106,12 @@ server.prompt(
       content: {
         type: "text" as const,
         text: `Run my daily Polymarket trading cycle:
-1. Call get_dashboard for current status
-2. Call get_portfolio to review open positions
-3. Call check_exits to handle stop-loss/take-profit triggers
-4. Call discover_flow to scan smart money convergence signals
-5. Call trending_markets to find high-volume opportunities
-6. Call assess_risk to check portfolio health
+1. Call dashboard.get for current status
+2. Call portfolio.get to review open positions
+3. Call positions.check_exits to handle stop-loss/take-profit triggers
+4. Call flow.discover to scan smart money convergence signals
+5. Call markets.trending to find high-volume opportunities
+6. Call portfolio.risk to check portfolio health
 7. Summarize findings and suggest next actions`
       }
     }]
@@ -139,10 +139,10 @@ server.prompt(
       content: {
         type: "text" as const,
         text: `Evaluate trader ${input.address} for copy trading:
-1. Call analyze_trader with this address for profile and stats
-2. Call score_trader to get conviction score across 5 dimensions
-3. Call get_trader_positions to see their current positions
-4. Call backtest_trader to simulate historical performance
+1. Call traders.analyze with this address for profile and stats
+2. Call traders.score to get conviction score across 5 dimensions
+3. Call traders.positions to see their current positions
+4. Call traders.backtest to simulate historical performance
 5. Based on all data, recommend whether to add this trader to the watchlist`
       }
     }]
@@ -150,339 +150,339 @@ server.prompt(
 );
 
 server.tool(
-  "discover_traders",
+  "traders.discover",
   "Fetch top traders from the Polymarket leaderboard ranked by PnL, volume, and ROI. Use this to find profitable traders worth copying. Returns trader address, PnL, volume, and win rate. Use auto_watch to add them to your watchlist directly.",
   discoverTradersSchema.shape,
-  safe("discover_traders", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverTraders(db, discoverTradersSchema.parse(input)) }] }))
+  safe("traders.discover", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverTraders(db, discoverTradersSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "watch_wallet",
+  "watchlist.add",
   "Add or remove an Ethereum wallet address from the copy trading watchlist. Watched wallets are monitored for new trades when the monitor is running. Use discover_traders first to find good wallets to watch.",
   watchWalletSchema.shape,
-  safe("watch_wallet", async (input) => ({ content: [{ type: "text" as const, text: await handleWatchWallet(db, watchWalletSchema.parse(input)) }] }))
+  safe("watchlist.add", async (input) => ({ content: [{ type: "text" as const, text: await handleWatchWallet(db, watchWalletSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "list_watchlist",
+  "watchlist.list",
   "Show all wallet addresses currently on the copy trading watchlist with their aliases and status. Returns a table of watched wallets. No parameters needed.",
   {},
-  safe("list_watchlist", async () => ({ content: [{ type: "text" as const, text: await handleListWatchlist(db) }] }))
+  safe("watchlist.list", async () => ({ content: [{ type: "text" as const, text: await handleListWatchlist(db) }] }))
 );
 
 server.tool(
-  "start_monitor",
+  "monitor.start",
   "Start a background loop that polls watched wallets for new trades and automatically copies them. Runs continuously at the specified interval until stop_monitor is called. Requires at least one wallet on the watchlist. Pro feature.",
   startMonitorSchema.shape,
-  safe("start_monitor", async (input) => ({ content: [{ type: "text" as const, text: await handleStartMonitor(db, walletMonitor, startMonitorSchema.parse(input)) }] }))
+  safe("monitor.start", async (input) => ({ content: [{ type: "text" as const, text: await handleStartMonitor(db, walletMonitor, startMonitorSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "stop_monitor",
+  "monitor.stop",
   "Stop the background wallet monitoring loop started by start_monitor. No parameters needed. Safe to call even if monitor is not running.",
   {},
-  safe("stop_monitor", async () => ({ content: [{ type: "text" as const, text: await handleStopMonitor(walletMonitor) }] }))
+  safe("monitor.stop", async () => ({ content: [{ type: "text" as const, text: await handleStopMonitor(walletMonitor) }] }))
 );
 
 server.tool(
-  "get_dashboard",
+  "dashboard.get",
   "Get a comprehensive dashboard showing daily budget usage, total P&L, recent trades, watchlist status, and monitor state. No parameters needed. Use this for a quick overview of your trading activity.",
   {},
-  safe("get_dashboard", async () => ({ content: [{ type: "text" as const, text: await handleGetDashboard(db, budgetManager, walletMonitor, tradeExecutor.getMode()) }] }))
+  safe("dashboard.get", async () => ({ content: [{ type: "text" as const, text: await handleGetDashboard(db, budgetManager, walletMonitor, tradeExecutor.getMode()) }] }))
 );
 
 server.tool(
-  "get_trade_history",
+  "trades.history",
   "Retrieve past copy trades from the database with optional filters by trader address or status. Returns trade details including entry price, P&L, and market info. Pro feature.",
   tradeHistorySchema.shape,
-  safe("get_trade_history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTradeHistory(db, tradeHistorySchema.parse(input)) }] }))
+  safe("trades.history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTradeHistory(db, tradeHistorySchema.parse(input)) }] }))
 );
 
 server.tool(
-  "set_config",
+  "config.set",
   "Update bot configuration at runtime. Supports daily_budget (max USDC per day) and min_conviction (minimum trade size to copy). Changes take effect immediately and persist across restarts. Pro feature.",
   setConfigSchema.shape,
-  safe("set_config", async (input) => ({ content: [{ type: "text" as const, text: await handleSetConfig(db, budgetManager, setConfigSchema.parse(input)) }] }))
+  safe("config.set", async (input) => ({ content: [{ type: "text" as const, text: await handleSetConfig(db, budgetManager, setConfigSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "go_live",
+  "config.go_live",
   "Switch from preview (simulated) to live trading mode where real orders are placed on Polymarket. Requires POLY_API_KEY, POLY_API_SECRET, POLY_API_PASSPHRASE, and POLY_PRIVATE_KEY in environment. This action uses real money. Pro feature.",
   goLiveSchema.shape,
-  safe("go_live", async (input) => ({ content: [{ type: "text" as const, text: await handleGoLive(tradeExecutor, goLiveSchema.parse(input)) }] }))
+  safe("config.go_live", async (input) => ({ content: [{ type: "text" as const, text: await handleGoLive(tradeExecutor, goLiveSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "analyze_trader",
+  "traders.analyze",
   "Analyze a Polymarket trader by wallet address. Returns profile stats, active positions, win rate, volume, PnL, and recent trade activity. Use before adding a trader to your watchlist to assess their quality.",
   analyzeTraderSchema.shape,
-  safe("analyze_trader", async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeTrader(analyzeTraderSchema.parse(input)) }] }))
+  safe("traders.analyze", async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeTrader(analyzeTraderSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_trader_positions",
+  "traders.positions",
   "View another trader's current open positions on Polymarket by their wallet address. Shows market name, outcome, size, and current price. Useful for due diligence before copy trading. Pro feature.",
   getTraderPositionsSchema.shape,
-  safe("get_trader_positions", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTraderPositions(getTraderPositionsSchema.parse(input)) }] }))
+  safe("traders.positions", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTraderPositions(getTraderPositionsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_positions",
+  "positions.list",
   "View your own copy trading positions filtered by status (open, closed, or all). Returns market name, entry price, current price, P&L, and exit rules for each position.",
   getPositionsSchema.shape,
-  safe("get_positions", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPositions(db, getPositionsSchema.parse(input)) }] }))
+  safe("positions.list", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPositions(db, getPositionsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "close_position",
+  "positions.close",
   "Manually close a copy trading position by trade ID. In live mode, places a sell order on Polymarket. In preview mode, marks the position as closed in the database. Use get_positions to find the trade_id. Pro feature.",
   closePositionSchema.shape,
-  safe("close_position", async (input) => ({ content: [{ type: "text" as const, text: await handleClosePosition(db, closePositionSchema.parse(input)) }] }))
+  safe("positions.close", async (input) => ({ content: [{ type: "text" as const, text: await handleClosePosition(db, closePositionSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "discover_markets",
+  "markets.discover",
   "Find active Polymarket prediction markets filtered by resolution deadline and category. Returns market question, price, volume, and end date. Use ending='today' for fast-resolving markets, or 'all' to browse everything.",
   discoverMarketsSchema.shape,
-  safe("discover_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverMarkets(discoverMarketsSchema.parse(input)) }] }))
+  safe("markets.discover", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverMarkets(discoverMarketsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_price",
+  "markets.price",
   "Get live bid/ask/spread prices from the CLOB order book for a specific market by condition_id. If no condition_id is given and show_positions is true, returns current prices for all open positions.",
   getPriceSchema.shape,
-  safe("get_price", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPrice(db, getPriceSchema.parse(input)) }] }))
+  safe("markets.price", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPrice(db, getPriceSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "discover_wta",
+  "wta.discover",
   "Find today's WTA tennis match markets on Polymarket where the favorite is available at a discount. Returns matches with current price vs fair price and the discount percentage. Use place_stink_bid to act on these opportunities. Pro feature.",
   discoverWtaSchema.shape,
-  safe("discover_wta", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverWta(discoverWtaSchema.parse(input)) }] }))
+  safe("wta.discover", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverWta(discoverWtaSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "place_stink_bid",
+  "wta.bid",
   "Place limit orders (stink bids) at a discount on WTA tennis match favorites. Orders sit in the order book until filled at your target price. In preview mode, simulates the orders. In live mode, places real CLOB orders. Pro feature.",
   placeStinkBidSchema.shape,
-  safe("place_stink_bid", async (input) => ({ content: [{ type: "text" as const, text: await handlePlaceStinkBid(db, tradeExecutor, placeStinkBidSchema.parse(input)) }] }))
+  safe("wta.bid", async (input) => ({ content: [{ type: "text" as const, text: await handlePlaceStinkBid(db, tradeExecutor, placeStinkBidSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "cancel_orders",
+  "orders.cancel",
   "Cancel all open/pending limit orders on Polymarket. Only works in live mode. Returns the number of cancelled orders. No parameters needed. Pro feature.",
   cancelOrdersSchema.shape,
-  safe("cancel_orders", async () => ({ content: [{ type: "text" as const, text: await handleCancelOrders(tradeExecutor) }] }))
+  safe("orders.cancel", async () => ({ content: [{ type: "text" as const, text: await handleCancelOrders(tradeExecutor) }] }))
 );
 
 server.tool(
-  "check_exits",
+  "positions.check_exits",
   "Scan all open positions for exit conditions: market resolution, stop-loss/take-profit triggers, or the original trader exiting. Updates P&L and closes positions that meet exit criteria. No parameters needed.",
   {},
-  safe("check_exits", async () => ({ content: [{ type: "text" as const, text: await handleCheckExits(db) }] }))
+  safe("positions.check_exits", async () => ({ content: [{ type: "text" as const, text: await handleCheckExits(db) }] }))
 );
 
 server.tool(
-  "log_cycle",
+  "agent.log_cycle",
   "Record an AI agent's trading cycle metrics to the database for dashboard tracking and performance analysis. Stores PnL, win rate, positions, budget usage, and notes. Call this after each automated trading cycle.",
   logCycleSchema.shape,
-  safe("log_cycle", (input) => ({ content: [{ type: "text" as const, text: handleLogCycle(db, logCycleSchema.parse(input)) }] }))
+  safe("agent.log_cycle", (input) => ({ content: [{ type: "text" as const, text: handleLogCycle(db, logCycleSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "set_exit_rules",
+  "positions.set_exit_rules",
   "Set stop-loss and/or take-profit price levels on an open position. When the market price crosses these levels, check_exits will automatically close the position. Use get_positions to find trade IDs. Pro feature.",
   setExitRulesSchema.shape,
-  safe("set_exit_rules", async (input) => ({ content: [{ type: "text" as const, text: await handleSetExitRules(db, setExitRulesSchema.parse(input)) }] }))
+  safe("positions.set_exit_rules", async (input) => ({ content: [{ type: "text" as const, text: await handleSetExitRules(db, setExitRulesSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_portfolio",
+  "portfolio.get",
   "Get a comprehensive portfolio overview showing all positions grouped by copied wallet, with per-wallet P&L, individual position details, and active exit rules. No parameters needed.",
   {},
-  safe("get_portfolio", async () => ({ content: [{ type: "text" as const, text: await handleGetPortfolio(db) }] }))
+  safe("portfolio.get", async () => ({ content: [{ type: "text" as const, text: await handleGetPortfolio(db) }] }))
 );
 
 server.tool(
-  "backtest_trader",
+  "traders.backtest",
   "Simulate copying a trader's historical trades to calculate hypothetical P&L. Shows what you would have earned if you had copy-traded this wallet. Use before adding a trader to your watchlist to validate their performance. Pro feature.",
   backtestTraderSchema.shape,
-  safe("backtest_trader", async (input) => ({ content: [{ type: "text" as const, text: await handleBacktestTrader(backtestTraderSchema.parse(input)) }] }))
+  safe("traders.backtest", async (input) => ({ content: [{ type: "text" as const, text: await handleBacktestTrader(backtestTraderSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "score_trader",
+  "traders.score",
   "Calculate a conviction score (0-100) for a trader across 5 dimensions: win rate, volume, consistency, experience, and diversity. Higher scores indicate more reliable traders for copy trading. Pro feature.",
   scoreTraderSchema.shape,
-  safe("score_trader", async (input) => ({ content: [{ type: "text" as const, text: await handleScoreTrader(scoreTraderSchema.parse(input)) }] }))
+  safe("traders.score", async (input) => ({ content: [{ type: "text" as const, text: await handleScoreTrader(scoreTraderSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "check_market",
+  "markets.check",
   "Evaluate market quality by checking bid/ask spread, order book depth, and price range. Returns a pass/fail with specific reasons. Use before placing trades to avoid illiquid or wide-spread markets. Pro feature.",
   checkMarketSchema.shape,
-  safe("check_market", async (input) => ({ content: [{ type: "text" as const, text: await handleCheckMarket(checkMarketSchema.parse(input)) }] }))
+  safe("markets.check", async (input) => ({ content: [{ type: "text" as const, text: await handleCheckMarket(checkMarketSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "discover_flow",
+  "flow.discover",
   "Scan top leaderboard traders for smart money convergence signals. Identifies markets where multiple top traders are buying the same outcome simultaneously, indicating strong conviction. Pro feature.",
   discoverFlowSchema.shape,
-  safe("discover_flow", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverFlow(discoverFlowSchema.parse(input)) }] }))
+  safe("flow.discover", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverFlow(discoverFlowSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_price_history",
+  "markets.price_history",
   "Fetch historical OHLC price data for a market token over a configurable time window (1h to 1m). Returns price points with a sparkline visualization showing the price trend. Pro feature.",
   getPriceHistorySchema.shape,
-  safe("get_price_history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPriceHistory(getPriceHistorySchema.parse(input)) }] }))
+  safe("markets.price_history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPriceHistory(getPriceHistorySchema.parse(input)) }] }))
 );
 
 server.tool(
-  "watch_market",
+  "markets.watch",
   "Manage your market watchlist: add, remove, or list watched markets with optional price alert thresholds. When a market crosses your alert price, it shows up in check_exits.",
   watchMarketSchema.shape,
-  safe("watch_market", async (input) => ({ content: [{ type: "text" as const, text: await handleWatchMarket(db, watchMarketSchema.parse(input)) }] }))
+  safe("markets.watch", async (input) => ({ content: [{ type: "text" as const, text: await handleWatchMarket(db, watchMarketSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "rebalance",
+  "watchlist.rebalance",
   "Analyze all traders on your watchlist and remove underperformers whose conviction score or win rate falls below your threshold. Use to keep your watchlist focused on high-quality traders. Pro feature.",
   rebalanceSchema.shape,
-  safe("rebalance", async (input) => ({ content: [{ type: "text" as const, text: await handleRebalance(db, rebalanceSchema.parse(input)) }] }))
+  safe("watchlist.rebalance", async (input) => ({ content: [{ type: "text" as const, text: await handleRebalance(db, rebalanceSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "buy",
+  "orders.buy",
   "Buy outcome shares on a Polymarket market. Specify condition_id, USDC amount, and optionally a limit price. Runs a market quality check before executing. In preview mode, simulates the trade. In live mode, places a real CLOB order.",
   buySchema.shape,
-  safe("buy", async (input) => ({ content: [{ type: "text" as const, text: await handleBuy(db, tradeExecutor, buySchema.parse(input)) }] }))
+  safe("orders.buy", async (input) => ({ content: [{ type: "text" as const, text: await handleBuy(db, tradeExecutor, buySchema.parse(input)) }] }))
 );
 
 server.tool(
-  "sell",
+  "orders.sell",
   "Sell an open position by trade_id (from get_positions) or condition_id. In live mode, places a sell order on Polymarket. In preview mode, marks the position as sold in the database and calculates realized P&L.",
   sellSchema.shape,
-  safe("sell", async (input) => ({ content: [{ type: "text" as const, text: await handleSell(db, tradeExecutor, sellSchema.parse(input)) }] }))
+  safe("orders.sell", async (input) => ({ content: [{ type: "text" as const, text: await handleSell(db, tradeExecutor, sellSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_balance",
+  "portfolio.balance",
   "View account balance summary: daily budget remaining, total invested, realized and unrealized P&L. No parameters needed. Use this to check how much budget is left before placing new trades.",
   {},
-  safe("get_balance", async () => ({ content: [{ type: "text" as const, text: await handleGetBalance(db, budgetManager) }] }))
+  safe("portfolio.balance", async () => ({ content: [{ type: "text" as const, text: await handleGetBalance(db, budgetManager) }] }))
 );
 
 server.tool(
-  "search_markets",
+  "markets.search",
   "Search Polymarket markets by keyword query. Returns matching markets with question, price, volume, and condition_id. Use the condition_id from results with buy, get_price, or analyze_opportunity.",
   searchMarketsSchema.shape,
-  safe("search_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleSearchMarkets(searchMarketsSchema.parse(input)) }] }))
+  safe("markets.search", async (input) => ({ content: [{ type: "text" as const, text: await handleSearchMarkets(searchMarketsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "detect_arbitrage",
+  "markets.arbitrage",
   "Scan active Polymarket markets for arbitrage opportunities where YES + NO prices don't sum to $1.00. Returns markets with the price gap and potential profit percentage.",
   detectArbitrageSchema.shape,
-  safe("detect_arbitrage", async (input) => ({ content: [{ type: "text" as const, text: await handleDetectArbitrage(detectArbitrageSchema.parse(input)) }] }))
+  safe("markets.arbitrage", async (input) => ({ content: [{ type: "text" as const, text: await handleDetectArbitrage(detectArbitrageSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "find_related",
+  "markets.related",
   "Find Polymarket markets related to a given condition_id or topic keyword. Useful for discovering correlated markets or building a diversified position across related events.",
   findRelatedSchema.shape,
-  safe("find_related", async (input) => ({ content: [{ type: "text" as const, text: await handleFindRelated(findRelatedSchema.parse(input)) }] }))
+  safe("markets.related", async (input) => ({ content: [{ type: "text" as const, text: await handleFindRelated(findRelatedSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_top_holders",
+  "markets.holders",
   "View the largest position holders in a Polymarket market by condition_id. Shows wallet address, position size, and side (YES/NO). Useful for gauging smart money sentiment on a market.",
   getTopHoldersSchema.shape,
-  safe("get_top_holders", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTopHolders(getTopHoldersSchema.parse(input)) }] }))
+  safe("markets.holders", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTopHolders(getTopHoldersSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "trending_markets",
+  "markets.trending",
   "List trending Polymarket markets ranked by trading volume over a configurable period (24h, 7d, or 30d). Filter by category to focus on specific topics. Returns market question, price, and volume.",
   trendingMarketsSchema.shape,
-  safe("trending_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleTrendingMarkets(trendingMarketsSchema.parse(input)) }] }))
+  safe("markets.trending", async (input) => ({ content: [{ type: "text" as const, text: await handleTrendingMarkets(trendingMarketsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "analyze_opportunity",
+  "markets.analyze",
   "Generate a BUY/SELL/HOLD recommendation for a Polymarket market by analyzing price, spread, price trend, and liquidity depth. Returns a score with detailed reasoning. Read-only analysis, does not place trades.",
   analyzeOpportunitySchema.shape,
-  safe("analyze_opportunity", async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeOpportunity(analyzeOpportunitySchema.parse(input)) }] }))
+  safe("markets.analyze", async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeOpportunity(analyzeOpportunitySchema.parse(input)) }] }))
 );
 
 server.tool(
-  "assess_risk",
+  "portfolio.risk",
   "Assess portfolio risk across 4 dimensions: position concentration, market diversification, stop-loss/take-profit coverage, and daily budget utilization. Returns a risk score with specific warnings. No parameters needed.",
   {},
-  safe("assess_risk", async () => ({ content: [{ type: "text" as const, text: await handleAssessRisk(db, budgetManager) }] }))
+  safe("portfolio.risk", async () => ({ content: [{ type: "text" as const, text: await handleAssessRisk(db, budgetManager) }] }))
 );
 
 server.tool(
-  "batch_order",
+  "orders.batch",
   "Execute multiple buy/sell orders in a single call (max 10 orders). Each order specifies a condition_id, amount, optional price, and side. Returns per-order results with success/failure status.",
   batchOrderSchema.shape,
-  safe("batch_order", async (input) => ({ content: [{ type: "text" as const, text: await handleBatchOrder(db, tradeExecutor, batchOrderSchema.parse(input)) }] }))
+  safe("orders.batch", async (input) => ({ content: [{ type: "text" as const, text: await handleBatchOrder(db, tradeExecutor, batchOrderSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "set_safety_limits",
+  "config.safety_limits",
   "Configure trading safety guardrails: maximum order size in USDC, total exposure cap, and maximum spread tolerance. These limits are enforced on all subsequent buy/sell operations. Changes persist in the database.",
   setSafetyLimitsSchema.shape,
-  safe("set_safety_limits", (input) => ({ content: [{ type: "text" as const, text: handleSetSafetyLimits(db, setSafetyLimitsSchema.parse(input)) }] }))
+  safe("config.safety_limits", (input) => ({ content: [{ type: "text" as const, text: handleSetSafetyLimits(db, setSafetyLimitsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_open_orders",
+  "orders.list",
   "View all pending limit orders on Polymarket that have not yet been filled. Only returns results in live mode. No parameters needed.",
   {},
-  safe("get_open_orders", async () => ({ content: [{ type: "text" as const, text: await handleGetOpenOrders(tradeExecutor) }] }))
+  safe("orders.list", async () => ({ content: [{ type: "text" as const, text: await handleGetOpenOrders(tradeExecutor) }] }))
 );
 
 server.tool(
-  "get_order_status",
+  "orders.status",
   "Check the current status of a specific Polymarket order by order ID. Returns fill status, price, and amount. Only works in live mode.",
   getOrderStatusSchema.shape,
-  safe("get_order_status", async (input) => ({ content: [{ type: "text" as const, text: await handleGetOrderStatus(tradeExecutor, getOrderStatusSchema.parse(input)) }] }))
+  safe("orders.status", async (input) => ({ content: [{ type: "text" as const, text: await handleGetOrderStatus(tradeExecutor, getOrderStatusSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "get_market_events",
+  "markets.events",
   "Browse Polymarket event groups to find all markets under a single event (e.g. 'US Election', 'UFC 300', 'NBA Finals'). Returns the event with all its sub-markets and their current prices.",
   getMarketEventsSchema.shape,
-  safe("get_market_events", async (input) => ({ content: [{ type: "text" as const, text: await handleGetMarketEvents(getMarketEventsSchema.parse(input)) }] }))
+  safe("markets.events", async (input) => ({ content: [{ type: "text" as const, text: await handleGetMarketEvents(getMarketEventsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "compare_markets",
+  "markets.compare",
   "Compare 2-5 Polymarket markets side by side. Shows price, spread, order book depth, volume, and quality score for each market. Useful for choosing the best market to trade among similar options.",
   compareMarketsSchema.shape,
-  safe("compare_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleCompareMarkets(compareMarketsSchema.parse(input)) }] }))
+  safe("markets.compare", async (input) => ({ content: [{ type: "text" as const, text: await handleCompareMarkets(compareMarketsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "featured_markets",
+  "markets.featured",
   "List top Polymarket markets ranked by liquidity with optional category filter (politics, sports, crypto, pop-culture, business, science). Returns the most liquid and actively traded markets.",
   featuredMarketsSchema.shape,
-  safe("featured_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleFeaturedMarkets(featuredMarketsSchema.parse(input)) }] }))
+  safe("markets.featured", async (input) => ({ content: [{ type: "text" as const, text: await handleFeaturedMarkets(featuredMarketsSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "optimize_portfolio",
+  "portfolio.optimize",
   "Analyze your open positions and generate optimization recommendations based on your chosen strategy (conservative, balanced, or aggressive). Returns SL/TP suggestions, concentration warnings, and cut/hold/take-profit actions for each position.",
   optimizePortfolioSchema.shape,
-  safe("optimize_portfolio", async (input) => ({ content: [{ type: "text" as const, text: await handleOptimizePortfolio(db, optimizePortfolioSchema.parse(input)) }] }))
+  safe("portfolio.optimize", async (input) => ({ content: [{ type: "text" as const, text: await handleOptimizePortfolio(db, optimizePortfolioSchema.parse(input)) }] }))
 );
 
 server.tool(
-  "watch_price",
+  "markets.watch_price",
   "Manage live WebSocket price subscriptions for real-time market updates. Subscribe to a token_id to start streaming price changes, unsubscribe to stop, or check connection status.",
   watchPriceSchema.shape,
-  safe("watch_price", (input) => ({ content: [{ type: "text" as const, text: handleWatchPrice(priceStream, watchPriceSchema.parse(input)) }] }))
+  safe("markets.watch_price", (input) => ({ content: [{ type: "text" as const, text: handleWatchPrice(priceStream, watchPriceSchema.parse(input)) }] }))
 );
 
 // MCP Resources
