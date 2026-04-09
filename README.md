@@ -14,6 +14,7 @@
 [![Socket Badge](https://socket.dev/api/badge/npm/package/polymarket-trader-mcp)](https://socket.dev/npm/package/polymarket-trader-mcp)
 [![Snyk](https://snyk.io/test/github/demwick/polymarket-trader-mcp/badge.svg)](https://snyk.io/test/github/demwick/polymarket-trader-mcp)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/demwick/polymarket-trader-mcp/badge)](https://securityscorecards.dev/viewer/?uri=github.com/demwick/polymarket-trader-mcp)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12433/badge)](https://www.bestpractices.dev/projects/12433)
 [![MCP Marketplace](https://mcp-marketplace.io/api/badge?slug=polymarket-mcp-server)](https://mcp-marketplace.io/server/polymarket-mcp-server)
 
 **Trade, analyze, and automate Polymarket prediction markets through AI.**
