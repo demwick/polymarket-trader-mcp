@@ -1,0 +1,31 @@
+name: Tag on merge
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  tag:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.title, 'Release v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+
+      - name: Create and push tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Tagging v${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+          echo "## Tagged v${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "Release workflow will publish to npm automatically." >> $GITHUB_STEP_SUMMARY
