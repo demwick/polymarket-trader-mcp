@@ -1,21 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="glow3c" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00d4aa"/>
-      <stop offset="100%" style="stop-color:#0088ff"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#022c22"/>
+      <stop offset="100%" style="stop-color:#064e3b"/>
     </linearGradient>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#34d399"/>
+      <stop offset="100%" style="stop-color:#6ee7b7"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="96" fill="#080c14"/>
-  <!-- Hexagon frame -->
-  <polygon points="256,60 430,160 430,352 256,452 82,352 82,160"
-    stroke="url(#glow3c)" stroke-width="3" fill="none" opacity="0.3"/>
-  <!-- Inner hexagon -->
-  <polygon points="256,100 400,185 400,330 256,415 112,330 112,185"
-    stroke="url(#glow3c)" stroke-width="1.5" fill="none" opacity="0.12"/>
-  <!-- PTM monogram - interlocking -->
-  <text x="256" y="300" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="140" font-weight="800" letter-spacing="-2" fill="url(#glow3c)">PTM</text>
-  <!-- Small chart line through letters -->
-  <polyline points="120,260 180,240 230,255 280,210 330,230 390,180"
-    stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
-  <circle cx="390" cy="180" r="5" fill="white" opacity="0.7"/>
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <!-- Subtle center glow -->
+  <circle cx="256" cy="235" r="190" fill="#10b981" opacity="0.05"/>
+  <circle cx="256" cy="235" r="130" fill="#10b981" opacity="0.04"/>
+  <!-- Rising bars -->
+  <rect x="80" y="295" width="40" height="65" rx="5" fill="#10b981" opacity="0.20"/>
+  <rect x="134" y="258" width="40" height="102" rx="5" fill="#10b981" opacity="0.30"/>
+  <rect x="188" y="222" width="40" height="138" rx="5" fill="#10b981" opacity="0.40"/>
+  <rect x="242" y="182" width="40" height="178" rx="5" fill="#10b981" opacity="0.50"/>
+  <rect x="296" y="148" width="40" height="212" rx="5" fill="#34d399" opacity="0.60"/>
+  <rect x="350" y="115" width="40" height="245" rx="5" fill="#34d399" opacity="0.70"/>
+  <rect x="404" y="84" width="40" height="276" rx="5" fill="#6ee7b7" opacity="0.82"/>
+  <!-- Neon connecting line -->
+  <polyline points="100,295 154,258 208,222 262,182 316,148 370,115 424,84"
+    stroke="url(#green)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle cx="424" cy="84" r="6" fill="#6ee7b7" filter="url(#glow)"/>
+  <!-- PTM -->
+  <text x="256" y="288" text-anchor="middle" font-family="system-ui,-apple-system,'SF Pro Display','Segoe UI',sans-serif" font-size="148" font-weight="900" letter-spacing="-2" fill="white">PTM</text>
+  <!-- Separator -->
+  <line x1="80" y1="368" x2="432" y2="368" stroke="#34d399" stroke-width="1" opacity="0.2"/>
+  <!-- Label -->
+  <text x="256" y="400" text-anchor="middle" font-family="system-ui,-apple-system,'SF Pro Display','Segoe UI',sans-serif" font-size="17" font-weight="600" fill="#34d399" letter-spacing="7" opacity="0.65">TRADER</text>
 </svg>
