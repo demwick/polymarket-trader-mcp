@@ -216,7 +216,13 @@ The server supports two transport modes:
 | Mode | Activation | Use case |
 |------|-----------|----------|
 | **stdio** (default) | `npx polymarket-trader-mcp` | Claude Code, Cursor, local MCP clients |
-| **HTTP** | `--http` flag or `PORT` env var | Smithery, Railway, Docker, remote hosting |
+| **HTTP** | `--http` flag or `PORT` env var | Self-hosted Docker, private VPS, single-user remote |
+
+### Deployment model — read this first
+
+This server is designed for **single-tenant use**. Each client runs its own instance with its own SQLite database (`copytrader.db`), watchlist, daily budget, trade history, and monitor loop. The stdio mode is the recommended path for most users — `npx polymarket-trader-mcp` or the Claude Code config above gives you a fully isolated, local-only instance.
+
+> ⚠️ **Do not expose an HTTP instance publicly.** The server has no per-user isolation: watchlist, positions, budget, and the background monitor loop are shared across every client that connects. A public HTTP deployment is effectively a shared workspace, not a multi-tenant SaaS. If you enable live trading, a public endpoint can drain your Polymarket wallet from any caller. Always set `MCP_API_KEY` and keep the endpoint behind a firewall, VPN, or auth proxy.
 
 ### Starting in HTTP mode
 
