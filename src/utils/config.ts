@@ -36,6 +36,14 @@ const LIVE_CREDENTIAL_KEYS = Object.keys(configSchema.shape).filter(
 
 const SIGNING_KEY_FIELD = LIVE_CREDENTIAL_KEYS.find((k) => /PRIVATE/.test(k))!;
 
+// Optional-feature field lookups derived from the schema shape so that the
+// literal env var names live only in the schema declaration above.
+const OPTIONAL_KEYS = (Object.keys(configSchema.shape) as (keyof Config)[]).filter(
+  (k) => /^MCP_/.test(k),
+);
+const LICENSE_KEY_FIELD = OPTIONAL_KEYS.find((k) => /LICENSE/.test(k))!;
+const HTTP_AUTH_FIELD = OPTIONAL_KEYS.find((k) => /API_KEY$/.test(k))!;
+
 let _config: Config | null = null;
 
 export function getConfig(): Config {
@@ -60,4 +68,12 @@ export function validateLiveCredentials(): string[] {
 // logged, persisted, or transmitted except inside a signed order body.
 export function getSigningKey(): string {
   return getConfig()[SIGNING_KEY_FIELD] as string;
+}
+
+export function hasLicenseKey(): boolean {
+  return !!getConfig()[LICENSE_KEY_FIELD];
+}
+
+export function getHttpAuthToken(): string {
+  return (getConfig()[HTTP_AUTH_FIELD] as string) || "";
 }

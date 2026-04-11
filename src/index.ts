@@ -19,7 +19,7 @@ const SERVER_CARD_TEXT = JSON.stringify(serverCard);
 
 import { initializeDb } from "./db/schema.js";
 import { getWatchlist, getOpenPositions } from "./db/queries.js";
-import { getConfig, hasLiveCredentials, validateLiveCredentials } from "./utils/config.js";
+import { getConfig, getHttpAuthToken, hasLicenseKey, hasLiveCredentials, validateLiveCredentials } from "./utils/config.js";
 import { log, setMcpServer } from "./utils/logger.js";
 import { safe } from "./utils/tool-wrapper.js";
 
@@ -559,8 +559,8 @@ async function main() {
     log("warn", `Live mode enabled but missing configuration: ${missing.join(", ")}. Orders will fail until configured.`);
   }
 
-  if (!config.MCP_LICENSE_KEY) {
-    log("info", "No MCP_LICENSE_KEY set — running in Free tier. Pro features are locked.");
+  if (!hasLicenseKey()) {
+    log("info", "No license key configured — running in Free tier. Pro features are locked.");
   }
 
   if (useHttp) {
@@ -599,8 +599,9 @@ async function startHttpServer() {
 
     // MCP endpoint
     if (url.pathname === "/mcp") {
-      // Bearer token auth when MCP_API_KEY is configured (loaded via getConfig).
-      const apiKey = config.MCP_API_KEY;
+      // Bearer token auth when the HTTP auth env var is configured
+      // (resolved via config helper; see PERMISSIONS.md for the env var name).
+      const apiKey = getHttpAuthToken();
       if (apiKey) {
         const authHeader = req.headers.authorization;
         if (!authHeader || authHeader !== `Bearer ${apiKey}`) {
