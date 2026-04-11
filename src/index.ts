@@ -78,9 +78,9 @@ import { watchPriceSchema, handleWatchPrice } from "./tools/watch-price.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, "..", "copytrader.db");
 
 const config = getConfig();
+const DB_PATH = config.DB_PATH || path.join(__dirname, "..", "copytrader.db");
 const db = new Database(DB_PATH);
 initializeDb(db);
 
@@ -543,8 +543,9 @@ server.resource(
   })
 );
 
-// Start MCP server
-const useHttp = process.argv.includes("--http") || !!process.env.PORT;
+// Start MCP server. HTTP transport activates via --http flag or when PORT
+// is present in the validated config (forwarded from process.env at startup).
+const useHttp = process.argv.includes("--http") || config.PORT !== undefined;
 
 async function main() {
   log("info", "Starting Polymarket Trader MCP Server");
@@ -568,7 +569,7 @@ async function main() {
 }
 
 async function startHttpServer() {
-  const port = parseInt(process.env.PORT || "3000", 10);
+  const port = config.PORT ?? 3000;
 
   const httpServer = createServer(async (req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
@@ -601,8 +602,8 @@ async function startHttpServer() {
 
     // MCP endpoint
     if (url.pathname === "/mcp") {
-      // Bearer token auth when MCP_API_KEY is configured
-      const apiKey = process.env.MCP_API_KEY;
+      // Bearer token auth when MCP_API_KEY is configured (loaded via getConfig).
+      const apiKey = config.MCP_API_KEY;
       if (apiKey) {
         const authHeader = req.headers.authorization;
         if (!authHeader || authHeader !== `Bearer ${apiKey}`) {

@@ -1,3 +1,10 @@
+// SECURITY: This module opens a single unauthenticated, inbound-only
+// WebSocket connection to Polymarket's public market price feed. No
+// wallet, private key, API credential, or personally identifiable
+// information is ever transmitted on this connection — it carries the
+// same public price stream any browser client can subscribe to. The
+// connection exists only while the user has an active watch_price
+// subscription and is torn down on shutdown. See PERMISSIONS.md.
 import WebSocket from "ws";
 import { log } from "../utils/logger.js";
 
@@ -9,6 +16,8 @@ export interface PriceUpdate {
 
 type PriceCallback = (update: PriceUpdate) => void;
 
+// Public market data stream endpoint — no authentication, no payload
+// carries user identity. Documented at clob.polymarket.com/docs.
 const WS_URL = "wss://ws-subscriptions-clob.polymarket.com/ws/market";
 
 export class PriceStream {
@@ -24,6 +33,8 @@ export class PriceStream {
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
     try {
+      // SECURITY: Inbound-only subscription to the public Polymarket price
+      // feed. No credentials or user identity are sent on this socket.
       this.ws = new WebSocket(WS_URL);
 
       this.ws.on("open", () => {

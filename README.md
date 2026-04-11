@@ -272,15 +272,17 @@ docker run -p 3000:3000 -v mcp-data:/app/data \
 
 ## Configuration
 
+All secrets stay in memory for the lifetime of the process — they are **never** written to the database, logs, or disk, and are only transmitted to their designated Polymarket API endpoint over HTTPS. Full disclosure: [PERMISSIONS.md](PERMISSIONS.md) and [SECURITY.md](SECURITY.md).
+
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `COPY_MODE` | No | `preview` | `preview` (simulated) or `live` (real orders) |
 | `DAILY_BUDGET` | No | `20` | Max daily spend in USDC |
 | `MIN_CONVICTION` | No | `3` | Min trade size to copy ($) |
-| `POLY_PRIVATE_KEY` | Live only | - | Polymarket wallet private key |
-| `POLY_API_KEY` | Live only | - | CLOB API key |
-| `POLY_API_SECRET` | Live only | - | CLOB API secret |
-| `POLY_API_PASSPHRASE` | Live only | - | CLOB API passphrase |
+| `POLY_PRIVATE_KEY` | Live only | - | Wallet private key — used **only** for locally signing CLOB orders, never persisted |
+| `POLY_API_KEY` | Live only | - | CLOB API key — sent only to `clob.polymarket.com` |
+| `POLY_API_SECRET` | Live only | - | CLOB API secret — sent only to `clob.polymarket.com` |
+| `POLY_API_PASSPHRASE` | Live only | - | CLOB API passphrase — sent only to `clob.polymarket.com` |
 
 ---
 
@@ -298,15 +300,19 @@ docker run -p 3000:3000 -v mcp-data:/app/data \
 
 ## Permissions & Capabilities
 
-This package has a transparent, minimal footprint. Full details: **[PERMISSIONS.md](PERMISSIONS.md)**
+This package has a transparent, minimal footprint. Full disclosure: **[PERMISSIONS.md](PERMISSIONS.md)** — machine-readable version in [`.well-known/mcp/server-card.json`](.well-known/mcp/server-card.json).
 
 | Category | Scope |
 |----------|-------|
-| **Network** | 3 Polymarket APIs (HTTPS) + 1 WebSocket for live prices + license check |
-| **Filesystem** | Single SQLite database file + `.env` read at startup |
-| **Environment** | API credentials (live mode only), budget config, mode selection |
-| **Processes** | None — no child processes, no shell commands |
-| **Telemetry** | None — no analytics, no tracking, no data sent to third parties |
+| **Network (outbound)** | 3 Polymarket HTTPS APIs + 1 inbound-only WSS public price stream (`ws-subscriptions-clob.polymarket.com`) + optional license check (`mcp-marketplace.io`) |
+| **Filesystem** | Single SQLite database file + `.env` read at startup — nothing else |
+| **Environment** | API credentials (live mode only, in memory only), budget config, mode selection |
+| **Processes** | None — no child processes, no shell commands, no `eval`/`Function` |
+| **Telemetry** | None — no analytics, no crash reports, no update checks, no third-party data flow |
+
+**WebSocket scope:** The WSS connection to Polymarket is **inbound-only** for public price updates. No wallet, credential, or user identity is transmitted — it carries the same public feed available to any browser client.
+
+**Secrets scope:** Every secret environment variable is held in memory only, never logged, never persisted, and sent to exactly one host (see [SECURITY.md](SECURITY.md#data-handling--secrets)).
 
 ---
 

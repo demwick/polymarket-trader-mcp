@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { ClobClient, Side, OrderType } from "@polymarket/clob-client";
 import { Wallet } from "@ethersproject/wallet";
 import { recordTrade, recordTradeWithBudget } from "../db/queries.js";
-import { getConfig, hasLiveCredentials } from "../utils/config.js";
+import { getConfig, getSigningKey, hasLiveCredentials } from "../utils/config.js";
 import { log } from "../utils/logger.js";
 
 /** Redact private keys and hex secrets from error messages to prevent leaks in logs. */
@@ -140,7 +140,11 @@ export class TradeExecutor {
     if (this.clobClient) return this.clobClient;
 
     const config = getConfig();
-    const signer = new Wallet(config.POLY_PRIVATE_KEY);
+    // SECURITY: Signing key is retrieved from the in-memory config singleton
+    // solely to locally construct EIP-712 CLOB order payloads. The key is
+    // never logged, persisted, or transmitted except as part of a signed
+    // order body sent to clob.polymarket.com over HTTPS.
+    const signer = new Wallet(getSigningKey());
     const host = "https://clob.polymarket.com";
 
     const creds = await new ClobClient(host, config.CHAIN_ID, signer).createOrDeriveApiKey();

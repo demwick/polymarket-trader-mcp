@@ -1416,5 +1416,189 @@
       "description": "Recent trade history",
       "mimeType": "application/json"
     }
-  ]
+  ],
+  "permissions": {
+    "network": {
+      "outbound": [
+        {
+          "host": "data-api.polymarket.com",
+          "protocol": "https",
+          "purpose": "Read-only trader activity, positions, and leaderboard data",
+          "sensitive": false
+        },
+        {
+          "host": "gamma-api.polymarket.com",
+          "protocol": "https",
+          "purpose": "Read-only market metadata, prices, and resolution status",
+          "sensitive": false
+        },
+        {
+          "host": "clob.polymarket.com",
+          "protocol": "https",
+          "purpose": "Order book reads; signed order placement in live mode only",
+          "sensitive": true,
+          "writeScope": "Only active when COPY_MODE=live and user-initiated trade tools are called"
+        },
+        {
+          "host": "ws-subscriptions-clob.polymarket.com",
+          "protocol": "wss",
+          "purpose": "Subscribe to real-time price updates for markets the user explicitly adds via markets.watch_price",
+          "sensitive": false,
+          "dataFlow": "inbound-only",
+          "authentication": "none",
+          "scope": "Public market price streams; no wallet or user identity transmitted"
+        },
+        {
+          "host": "mcp-marketplace.io",
+          "protocol": "https",
+          "purpose": "One-time license key verification at startup; cached after first call",
+          "sensitive": false,
+          "optional": true
+        }
+      ],
+      "inbound": [
+        {
+          "transport": "HTTP (optional)",
+          "port": "PORT env var (default 3000)",
+          "purpose": "StreamableHTTP MCP transport when running in HTTP mode",
+          "optional": true,
+          "authentication": "Bearer token via MCP_API_KEY when set; otherwise disabled"
+        }
+      ]
+    },
+    "filesystem": {
+      "read": [
+        {
+          "path": ".env",
+          "purpose": "Load environment variables via dotenv at startup",
+          "when": "startup only"
+        }
+      ],
+      "readWrite": [
+        {
+          "path": "./copytrader.db",
+          "configurableVia": "DB_PATH env var",
+          "purpose": "SQLite database for watchlist, trades, daily budget, config, agent cycles, and market watchlist",
+          "sensitive": false,
+          "note": "Never stores private keys, API secrets, or personally identifiable information"
+        }
+      ],
+      "denied": [
+        "No access to user home directory beyond ./copytrader.db and ./.env",
+        "No temporary files created",
+        "No writes outside the working directory"
+      ]
+    },
+    "environmentVariables": [
+      {
+        "name": "POLY_PRIVATE_KEY",
+        "sensitivity": "secret",
+        "required": "live mode only",
+        "purpose": "Wallet private key used solely for locally signing Polymarket CLOB orders",
+        "scope": "Read into memory at startup; never logged, never persisted to DB, never transmitted except as part of EIP-712 signed order payloads to clob.polymarket.com",
+        "disposal": "Held only in process memory for the lifetime of the server"
+      },
+      {
+        "name": "POLY_API_KEY",
+        "sensitivity": "secret",
+        "required": "live mode only",
+        "purpose": "CLOB API key for authenticating signed order requests",
+        "scope": "Sent only to clob.polymarket.com via HTTPS; never logged or persisted"
+      },
+      {
+        "name": "POLY_API_SECRET",
+        "sensitivity": "secret",
+        "required": "live mode only",
+        "purpose": "CLOB API secret used for HMAC signing of authenticated requests",
+        "scope": "Sent only to clob.polymarket.com via HTTPS; never logged or persisted"
+      },
+      {
+        "name": "POLY_API_PASSPHRASE",
+        "sensitivity": "secret",
+        "required": "live mode only",
+        "purpose": "CLOB API passphrase paired with API key and secret",
+        "scope": "Sent only to clob.polymarket.com via HTTPS; never logged or persisted"
+      },
+      {
+        "name": "POLY_FUNDER_ADDRESS",
+        "sensitivity": "public",
+        "required": "live mode only",
+        "purpose": "Funder wallet address used in CLOB order payloads",
+        "scope": "Sent only to clob.polymarket.com"
+      },
+      {
+        "name": "MCP_LICENSE_KEY",
+        "sensitivity": "secret",
+        "required": false,
+        "purpose": "MCP Marketplace license verification for Pro features",
+        "scope": "Sent only to mcp-marketplace.io at startup"
+      },
+      {
+        "name": "MCP_API_KEY",
+        "sensitivity": "secret",
+        "required": false,
+        "purpose": "Bearer token that gates the optional HTTP transport",
+        "scope": "Compared in-process against incoming Authorization headers; never transmitted outbound"
+      },
+      {
+        "name": "DB_PATH",
+        "sensitivity": "public",
+        "required": false,
+        "purpose": "Override default SQLite database file location"
+      },
+      {
+        "name": "PORT",
+        "sensitivity": "public",
+        "required": false,
+        "purpose": "HTTP transport listen port when running in HTTP mode"
+      },
+      {
+        "name": "COPY_MODE",
+        "sensitivity": "public",
+        "required": false,
+        "purpose": "preview (default, simulated) or live (real orders). Live mode is gated by all four POLY_* secrets being present"
+      },
+      {
+        "name": "DAILY_BUDGET",
+        "sensitivity": "public",
+        "required": false,
+        "purpose": "Hard daily spending cap in USDC enforced by BudgetManager"
+      },
+      {
+        "name": "MIN_CONVICTION",
+        "sensitivity": "public",
+        "required": false,
+        "purpose": "Minimum trade size threshold for copy-trade candidates"
+      },
+      {
+        "name": "CHAIN_ID",
+        "sensitivity": "public",
+        "required": false,
+        "purpose": "Polygon chain id (default 137)"
+      }
+    ],
+    "process": {
+      "spawnsChildProcesses": false,
+      "executesShellCommands": false,
+      "usesDynamicCodeExecution": false,
+      "note": "Any exec() calls in the source refer to better-sqlite3 Database.exec() for SQL statements, not child_process.exec()"
+    },
+    "dataHandling": {
+      "telemetry": "none",
+      "analytics": "none",
+      "thirdPartyReporting": "none",
+      "piiStored": "none",
+      "secretsPersisted": "none",
+      "localOnly": true
+    }
+  },
+  "security": {
+    "trustBoundary": "single-tenant local process; not designed for multi-user hosting",
+    "secretsPolicy": "All secrets live exclusively in environment variables loaded at startup. None are written to disk, database, logs, stdout, or any outbound request except to their designated API endpoint over HTTPS.",
+    "defaultMode": "preview (simulated trades) — requires explicit COPY_MODE=live and all POLY_* credentials to place real orders",
+    "networkPolicy": "Only the five hosts listed in permissions.network.outbound are contacted. All HTTP requests use fetchWithRetry with a 10s timeout and bounded exponential backoff.",
+    "inputValidation": "Every MCP tool input is validated through Zod schemas before reaching any service or database layer",
+    "disclosureContact": "talhademirell@outlook.com",
+    "disclosurePolicy": "SECURITY.md"
+  }
 }

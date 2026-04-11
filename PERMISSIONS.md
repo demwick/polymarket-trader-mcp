@@ -1,72 +1,112 @@
 # Permissions & Capabilities
 
-This document declares what `polymarket-trader-mcp` accesses at runtime. No hidden behavior — everything is listed here.
+This document is the authoritative disclosure of everything `polymarket-trader-mcp` reads, writes, or sends over the network. There is no hidden behavior — if it is not listed here, it does not happen. The machine-readable equivalent of this manifest lives in [`.well-known/mcp/server-card.json`](./.well-known/mcp/server-card.json) under the `permissions` and `security` keys.
 
-## Network Access
+## Sensitivity Legend
 
-| Endpoint | Protocol | Purpose | When |
-|----------|----------|---------|------|
-| `data-api.polymarket.com` | HTTPS | Trader activity, positions, leaderboard | Discovery & analysis tools |
-| `gamma-api.polymarket.com` | HTTPS | Market metadata, prices, resolution status | Market search & info tools |
-| `clob.polymarket.com` | HTTPS | Order book, order placement, price history | Trading & price tools |
-| `wss://ws-subscriptions-clob.polymarket.com` | WSS | Real-time price streaming | `watch_market` price alerts |
-| `mcp-marketplace.io` | HTTPS | License key verification | Startup (optional) |
+| Label | Meaning |
+|-------|---------|
+| **Secret** | Credential material — wallet private key, API secret, license key. Never logged, never persisted, never sent anywhere except its designated endpoint. |
+| **Sensitive** | Non-secret but identifies the user (e.g. funder address). Never logged, only sent to its designated endpoint. |
+| **Public** | Configuration or state that could appear in a support bug report without risk. |
 
-No other network connections are made. All HTTP requests use `fetch` with a 10-second timeout and automatic retry (max 2 retries with exponential backoff).
+## Network Access — Outbound
+
+| Endpoint | Protocol | Purpose | Sensitivity | Condition |
+|----------|----------|---------|-------------|-----------|
+| `data-api.polymarket.com` | HTTPS | Read-only trader activity, positions, and leaderboard | Read-only public data | Always available |
+| `gamma-api.polymarket.com` | HTTPS | Read-only market metadata, prices, and resolution status | Read-only public data | Always available |
+| `clob.polymarket.com` | HTTPS | Order book reads; signed order placement | **Write-capable** | Order placement only when `COPY_MODE=live` **and** a user-initiated trade tool is invoked |
+| `ws-subscriptions-clob.polymarket.com` | WSS | Subscribe to real-time public price updates for explicitly watched markets | Inbound-only, unauthenticated | Only when the user calls `markets.watch_price` |
+| `mcp-marketplace.io` | HTTPS | One-time license key verification; result is cached | Credential-bearing (license key only) | At startup if `MCP_LICENSE_KEY` is set |
+
+All outbound HTTP requests go through `fetchWithRetry` (`src/utils/fetch.ts`) with a 10-second timeout and at most two retries with exponential backoff. **No other outbound connections are made.** No analytics, crash reporting, update checks, or telemetry endpoints are contacted.
+
+### WebSocket Disclosure
+
+The WebSocket connection to `ws-subscriptions-clob.polymarket.com` is **inbound-only** (the server subscribes to Polymarket's public price stream and receives updates). No wallet, user identity, or credential is transmitted over this connection — it is the same public feed any browser client uses. The connection exists only while the user actively has a `watch_price` subscription; it is closed on shutdown.
+
+## Network Access — Inbound (Optional HTTP Transport)
+
+`polymarket-trader-mcp` ships as a stdio MCP server by default. When run in StreamableHTTP mode it additionally binds to a local port:
+
+| Setting | Default | Purpose |
+|---------|---------|---------|
+| `PORT` | `3000` | Listen port for the StreamableHTTP transport |
+| `MCP_API_KEY` | unset | Required bearer token on incoming requests; if unset, HTTP transport authentication is disabled |
+
+This package is designed for **single-tenant** local or private deployments. See the README for the explicit warning against multi-user hosting.
 
 ## Environment Variables
 
-| Variable | Contains | Required | Used For |
-|----------|----------|----------|----------|
-| `POLY_PRIVATE_KEY` | Wallet private key | Live mode only | Signing transactions on Polymarket |
-| `POLY_API_KEY` | CLOB API key | Live mode only | Authenticating with CLOB API |
-| `POLY_API_SECRET` | CLOB API secret | Live mode only | Authenticating with CLOB API |
-| `POLY_API_PASSPHRASE` | CLOB API passphrase | Live mode only | Authenticating with CLOB API |
-| `POLY_FUNDER_ADDRESS` | Wallet address | Live mode only | Identifying funder account |
-| `DAILY_BUDGET` | Number (USDC) | No (default: 20) | Daily spending limit |
-| `MIN_CONVICTION` | Number (USDC) | No (default: 3) | Minimum trade size to copy |
-| `COPY_MODE` | `preview` or `live` | No (default: preview) | Execution mode |
-| `CHAIN_ID` | Number | No (default: 137) | Polygon chain ID |
-| `MCP_LICENSE_KEY` | License string | No | MCP Marketplace license verification |
-| `MCP_API_KEY` | Bearer token | No | HTTP transport authentication |
-| `PORT` | Number | No (default: 3000) | HTTP server port |
+| Variable | Sensitivity | Required | Purpose | Scope |
+|----------|-------------|----------|---------|-------|
+| `POLY_PRIVATE_KEY` | **Secret** | Live mode only | Wallet private key used solely for locally signing EIP-712 Polymarket CLOB order payloads | Held in process memory only; never logged, never written to DB, never transmitted except inside signed order payloads to `clob.polymarket.com` |
+| `POLY_API_KEY` | **Secret** | Live mode only | CLOB API key | Sent only to `clob.polymarket.com` |
+| `POLY_API_SECRET` | **Secret** | Live mode only | CLOB API secret used for HMAC signing | Sent only to `clob.polymarket.com` |
+| `POLY_API_PASSPHRASE` | **Secret** | Live mode only | CLOB API passphrase | Sent only to `clob.polymarket.com` |
+| `POLY_FUNDER_ADDRESS` | Sensitive | Live mode only | Funder wallet address in CLOB order payloads | Sent only to `clob.polymarket.com` |
+| `MCP_LICENSE_KEY` | **Secret** | No | MCP Marketplace license for Pro features | Sent only to `mcp-marketplace.io` at startup; cached in memory afterwards |
+| `MCP_API_KEY` | **Secret** | No | Bearer token gating the optional HTTP transport | Compared in-process against incoming `Authorization` headers; never transmitted outbound |
+| `DB_PATH` | Public | No (default `./copytrader.db`) | Override SQLite database file location | Read at startup |
+| `PORT` | Public | No (default `3000`) | HTTP transport listen port | Read at startup |
+| `COPY_MODE` | Public | No (default `preview`) | `preview` = simulated trades in local DB; `live` = real orders | Gates live trading; requires all four `POLY_*` secrets to be present |
+| `DAILY_BUDGET` | Public | No (default `20`) | Hard daily spending cap in USDC | Enforced by `BudgetManager` |
+| `MIN_CONVICTION` | Public | No (default `3`) | Minimum USDC trade size considered for copy-trading | Filter only |
+| `CHAIN_ID` | Public | No (default `137`) | Polygon chain id | Used in signed orders |
 
-All environment variables are validated at startup using Zod schemas. Sensitive credentials are never logged, stored in the database, or transmitted except to their designated API endpoints.
+All environment variables are validated at startup through a Zod schema (`src/utils/config.ts`). If validation fails, the process exits before any service starts.
+
+### Secrets Policy
+
+Every variable marked **Secret** obeys the same five rules, enforced by code review:
+
+1. **In memory only.** Held in the validated config singleton for the lifetime of the process. Never persisted to disk, database, or any file the user did not write themselves.
+2. **Never logged.** The logger (`src/utils/logger.ts`) writes to stderr and has no code path that serializes the config object.
+3. **Never mirrored into the database.** None of the tables (`watchlist`, `trades`, `daily_budget`, `config`, `agent_cycles`, `market_watchlist`) have columns for credentials.
+4. **Single destination.** Each secret is sent to exactly one host (see the "Scope" column above) and nowhere else.
+5. **Not in error messages.** Errors bubbling up from the CLOB client are sanitized before reaching the user-facing tool response.
 
 ## Filesystem Access
 
 | Path | Access | Purpose |
 |------|--------|---------|
-| `./copytrader.db` (or `DB_PATH`) | Read/Write | SQLite database for trades, watchlist, config, and budget tracking |
-| `.env` | Read | Environment variable loading via dotenv (startup only) |
+| `./copytrader.db` (or `DB_PATH`) | Read/Write | SQLite database for watchlist, trades, daily budget, config, agent cycles, and market watchlist |
+| `./.env` | Read | dotenv environment loading at startup only |
 
-No other files are read or written. No temporary files are created.
+**Nothing else is read or written.** No files in the home directory, no temp files, no cache files, no log files. The SQLite database contains no credentials, no PII, and no data that is not already public on-chain (trade records and market metadata).
 
 ## Process Execution
 
-This package does **not** spawn child processes. The `exec()` calls in the codebase are `better-sqlite3`'s `Database.exec()` method for executing SQL statements — not `child_process.exec()`.
+This package does **not** spawn child processes and does **not** execute shell commands. The `exec()` calls present in the source code refer to `better-sqlite3`'s `Database.exec()` method for running SQL statements — not `child_process.exec()`. There is no use of `eval()`, `Function()`, or any other dynamic code execution primitive.
 
 ## Data Storage
 
-All data is stored locally in a single SQLite database file:
+All runtime state lives in a single local SQLite file:
 
-| Table | Contains | Sensitive |
-|-------|----------|-----------|
-| `watchlist` | Tracked wallet addresses and stats | No |
-| `trades` | Trade history (simulated and live) | No |
+| Table | Contains | Contains Secrets? |
+|-------|----------|-------------------|
+| `watchlist` | Tracked wallet addresses (public) and alias strings | No |
+| `trades` | Trade history — simulated in preview, real in live | No |
 | `daily_budget` | Daily spending records | No |
-| `config` | User-set configuration key/value pairs | No |
+| `config` | User-set configuration key/value pairs (non-secret) | No |
 | `agent_cycles` | Agent automation logs | No |
 | `market_watchlist` | Price alert watchlist | No |
 
-No data is sent to external analytics, telemetry, or third-party services.
+No data is sent to external analytics, telemetry, error reporting, or any third-party service of any kind.
 
 ## What This Package Does NOT Do
 
 - Does not spawn child processes or execute shell commands
 - Does not access the filesystem beyond the SQLite database and `.env`
-- Does not send telemetry or analytics data
+- Does not send telemetry, analytics, crash reports, or update checks
 - Does not modify system configuration
 - Does not install additional packages at runtime
 - Does not use `eval()`, `Function()`, or dynamic code execution
-- Does not access clipboard, camera, microphone, or other system resources
+- Does not access the clipboard, camera, microphone, or any other system resource
+- Does not store, log, or persist any secret environment variable
+- Does not operate as a multi-tenant service — it is designed for single-user local use
+
+## Reporting
+
+If you find a capability in the source code that contradicts this document, that is a bug — please report it via [SECURITY.md](./SECURITY.md).
