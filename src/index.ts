@@ -5,7 +5,6 @@ import { completable } from "@modelcontextprotocol/sdk/server/completable.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "http";
-import { readFileSync } from "fs";
 import Database from "better-sqlite3";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -13,6 +12,10 @@ import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../package.json");
+// Module-load time import of the static public server card so that handlers
+// never perform filesystem reads in the request path.
+const serverCard = require("../.well-known/mcp/server-card.json");
+const SERVER_CARD_TEXT = JSON.stringify(serverCard);
 
 import { initializeDb } from "./db/schema.js";
 import { getWatchlist, getOpenPositions } from "./db/queries.js";
@@ -574,16 +577,10 @@ async function startHttpServer() {
   const httpServer = createServer(async (req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
 
-    // Server card for Smithery discovery
+    // Server card for Smithery discovery (served from pre-loaded static JSON).
     if (url.pathname === "/.well-known/mcp/server-card.json") {
-      try {
-        const card = readFileSync(path.join(__dirname, "..", ".well-known", "mcp", "server-card.json"), "utf-8");
-        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-        res.end(card);
-      } catch {
-        res.writeHead(404);
-        res.end("Not Found");
-      }
+      res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+      res.end(SERVER_CARD_TEXT);
       return;
     }
 
