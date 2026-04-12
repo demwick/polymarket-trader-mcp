@@ -1,8 +1,5 @@
 # Polymarket Agent MCP Server
-
-<a href="https://glama.ai/mcp/servers/demwick/polymarket-agent-mcp">
-  <img src="https://glama.ai/mcp/servers/demwick/polymarket-agent-mcp/badges/card.svg" alt="polymarket-agent-mcp MCP server" />
-</a>
+[![polymarket-trader-mcp MCP server](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp/badges/card.svg)](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp)
 
 [![npm version](https://img.shields.io/npm/v/polymarket-agent-mcp)](https://www.npmjs.com/package/polymarket-agent-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/polymarket-agent-mcp)](https://www.npmjs.com/package/polymarket-agent-mcp)
