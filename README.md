@@ -1,8 +1,6 @@
 # Polymarket Agent MCP Server
-[![polymarket-trader-mcp MCP server](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp/badges/card.svg)](https://glama.ai/mcp/servers/demwick/polymarket-trader-mcp)
 
 [![npm version](https://img.shields.io/npm/v/polymarket-agent-mcp)](https://www.npmjs.com/package/polymarket-agent-mcp)
-[![npm downloads](https://img.shields.io/npm/dm/polymarket-agent-mcp)](https://www.npmjs.com/package/polymarket-agent-mcp)
 [![GitHub stars](https://img.shields.io/github/stars/demwick/polymarket-agent-mcp)](https://github.com/demwick/polymarket-agent-mcp)
 [![GitHub last commit](https://img.shields.io/github/last-commit/demwick/polymarket-agent-mcp)](https://github.com/demwick/polymarket-agent-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
