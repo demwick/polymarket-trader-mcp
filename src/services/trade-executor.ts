@@ -5,6 +5,23 @@ import { recordTrade, recordTradeWithBudget } from "../db/queries.js";
 import { getConfig, getSigningKey, hasLiveCredentials } from "../utils/config.js";
 import { log } from "../utils/logger.js";
 
+/**
+ * Resolve today's effective daily budget limit, preferring a dashboard-written
+ * `daily_budget.limit_amount` override and falling back to the env default.
+ * Mirrors BudgetManager.getDailyLimit so preview trades record spending against
+ * the same source of truth even when called through direct tools (buy/sell).
+ */
+function resolveDailyLimit(db: Database.Database): number {
+  const today = new Date().toISOString().split("T")[0];
+  const row = db
+    .prepare("SELECT limit_amount FROM daily_budget WHERE date = ?")
+    .get(today) as { limit_amount: number } | undefined;
+  if (row && typeof row.limit_amount === "number" && row.limit_amount > 0) {
+    return row.limit_amount;
+  }
+  return getConfig().DAILY_BUDGET;
+}
+
 /** Redact private keys and hex secrets from error messages to prevent leaks in logs. */
 function sanitizeError(msg: string): string {
   // Remove anything that looks like a private key or hex secret (32+ hex chars)
@@ -64,10 +81,22 @@ export class TradeExecutor {
       status: "simulated" as const,
     };
 
-    // Use atomic transaction if budget info provided
-    const tradeId = order.budget
-      ? recordTradeWithBudget(this.db, tradeData, order.budget.date, order.budget.spendAmount, order.budget.dailyLimit)
-      : recordTrade(this.db, tradeData);
+    // BUY spends — amount in USDC is what leaves the budget. Auto-populate
+    // budget info when the caller (e.g. direct `buy` tool) didn't supply it so
+    // that `daily_budget.spent` stays accurate across every preview BUY path.
+    const budget = order.budget ?? {
+      date: new Date().toISOString().split("T")[0],
+      spendAmount: order.amount,
+      dailyLimit: resolveDailyLimit(this.db),
+    };
+
+    const tradeId = recordTradeWithBudget(
+      this.db,
+      tradeData,
+      budget.date,
+      budget.spendAmount,
+      budget.dailyLimit
+    );
 
     log("trade", `[PREVIEW] Simulated BUY $${order.amount} @ ${order.price} on ${order.marketSlug}`, {
       trader: order.traderAddress,
